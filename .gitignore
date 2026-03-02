@@ -1,10 +1,32 @@
+# Dependencies
 node_modules/
-/nodes/
-/examples/
-/jsons/
-.idea/
-/readme_images/
-test.js
+
+# Build output
 build/
-*.json.bak
-src/nodes/connect/devices.json
+dist/
+*.tsbuildinfo
+
+# Runtime & logs
+*.log
+npm-debug.log*
+pids/
+*.pid
+*.seed
+
+# Environment
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Test & coverage
+coverage/
