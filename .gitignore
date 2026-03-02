@@ -1,7 +1,10 @@
 node_modules/
-nodes/
-examples/
-jsons/
+/nodes/
+/examples/
+/jsons/
 .idea/
-readme_images/
+/readme_images/
 test.js
+build/
+*.json.bak
+src/nodes/connect/devices.json
