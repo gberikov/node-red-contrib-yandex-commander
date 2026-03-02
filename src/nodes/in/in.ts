@@ -1,0 +1,77 @@
+import { NodeInitializer } from 'node-red';
+import { StationHelper } from '../../lib/stationHelper';
+import { InNodeConfig, ConnectNode, NodeStatusData, DeviceState } from '../../lib/types';
+
+const nodeInit: NodeInitializer = (RED) => {
+  /**
+   * Конструктор ноды yandex-commander-in.
+   * Автоматически отправляет состояние станции на выход при каждом WS-обновлении.
+   * Поддерживает форматы status и homekit, опционально фильтрует дубликаты.
+   */
+  function InNodeConstructor(this: any, config: InNodeConfig): void {
+    RED.nodes.createNode(this, config);
+    const node = this;
+    node.controller = RED.nodes.getNode(config.token) as ConnectNode | null;
+    node.stationId = config.station_id;
+    node.output = config.output;
+    node.debugFlag = config.debugFlag;
+    node.uniqueFlag = config.uniqueFlag;
+    node.homekitFormat = config.homekitFormat;
+    node.lastMessage = {};
+    node.status({});
+
+    /** Выводит отладочное сообщение в лог */
+    function debugMessage(text: string): void {
+      if (node.debugFlag) {
+        node.log(text);
+      }
+    }
+
+    debugMessage(`Node settings: ID: ${node.stationId}, Output Format: ${node.output}, HK: ${node.homekitFormat}`);
+
+    /** Отправляет сообщение на выход ноды; в режиме homekit + uniqueFlag фильтрует дубликаты */
+    function sendMessage(message: any): void {
+      if (node.uniqueFlag && node.output === 'homekit') {
+        if (JSON.stringify(node.lastMessage.payload) !== JSON.stringify(message.payload)) {
+          node.send(message);
+          node.lastMessage = message;
+          debugMessage(`Sent message to Homekit: ${JSON.stringify(message)}`);
+        }
+      } else {
+        node.send(message);
+      }
+    }
+
+    /** Обработчик WS-сообщения: подготавливает payload и отправляет на выход */
+    node.onMessage = function (data: DeviceState): void {
+      sendMessage(StationHelper.preparePayload(node, data));
+    };
+
+    /** Обновляет визуальный статус ноды в редакторе */
+    node.onStatus = function (data: NodeStatusData): void {
+      if (data) {
+        node.status({ fill: data.color, shape: 'dot', text: data.text });
+      }
+    };
+
+    /** Отписывается от событий контроллера при удалении ноды */
+    node.onClose = function (): void {
+      if (node.controller) {
+        node.controller.removeListener(`message_${node.stationId}`, node.onMessage);
+        node.controller.removeListener(`statusUpdate_${node.stationId}`, node.onStatus);
+      }
+    };
+
+    if (node.controller) {
+      node.onStatus(node.controller.getStatus(node.stationId));
+      node.controller.on(`message_${node.stationId}`, node.onMessage);
+      node.controller.on(`statusUpdate_${node.stationId}`, node.onStatus);
+    }
+
+    node.on('close', node.onClose);
+  }
+
+  RED.nodes.registerType('yandex-commander-in', InNodeConstructor);
+};
+
+export default nodeInit;

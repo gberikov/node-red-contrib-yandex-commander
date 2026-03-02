@@ -1,0 +1,52 @@
+{
+  "compilerOptions": {
+    "outDir": "./build",
+    "rootDir": "./src",
+    "target": "ES2018",
+    "module": "CommonJS",
+    "lib": [
+      "es2018",
+      "DOM"
+    ],
+    "allowJs": false,
+    "noEmitOnError": false,
+    "removeComments": false,
+    "noEmit": false,
+    "importHelpers": false,
+    "preserveWatchOutput": true,
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "preserveConstEnums": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "sourceMap": false,
+    "resolveJsonModule": true,
+    "noImplicitReturns": false,
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "src/**/html/editor.ts",
+    "src/**/*.html",
+    "src/**/locales/**",
+    "node_modules",
+    "build"
+  ]
+}

@@ -1,0 +1,52 @@
+<script type="text/html" data-template-name="yandex-commander-get">
+  <style>
+      .label-long {min-width: 150px;width: 20%;}
+      .online {display: inline-block; width: auto; vertical-align: middle;}
+  </style>
+
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-bookmark"></i>Name</label>
+    <input type="text" id="node-input-name" placeholder="">
+  </div>
+  <div class="form-row">
+    <label for="node-input-token"><i class="fa fa-globe"></i>Login</label>
+    <input type="text" id="node-input-token" placeholder="Token">
+  </div>
+  <div class="form-row">
+    <label for="node-input-station_id"><i class="fa fa-database">Station</i></label>
+    <div style="display: inline-block;position: relative;width: 70%;height: 20px;">
+      <div style="position: absolute;left: 0px; right: 40px;">
+        <select id="node-input-station_id" data-single="true" style="width: 100%"></select>
+      </div>
+      <div style="text-align: end; display: inline; float: right">
+        <button class="red-ui-button" style="position: absolute;right: 0px;top: 0px;"><i class="fa fa-refresh"></i></button>
+      </div>
+    </div>
+  </div>
+  <div class="form-row">
+    <label for="node-input-output"><i class="fa fa-arrow-circle-o-left">Output</i></label>
+    <div style="display: inline-block;position: relative;width: 70%;height: 20px;">
+      <div style="position: absolute;left: 0px; right: 0px;">
+        <select id="node-input-output" data-single="true" style="width: 100%">
+          <option value="status">Full status Message</option>
+          <option value="homekit">HomeKit formatted</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="form-row" id="node-homekitFormat">
+    <label for="node-input-homekitFormat"><i class="fa fa-arrow-circle-o-left">Homekit Format</i></label>
+    <div style="display: inline-block;position: relative;width: 70%;height: 20px;">
+      <div style="position: absolute;left: 0px; right: 0px;">
+        <select id="node-input-homekitFormat" data-single="true" style="width: 100%">
+          <option value="speaker">Smart Speaker</option>
+          <option value="tv">Television</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="form-row">
+    <label for='node-input-debugFlag'><i class='fa fa-share-square'>Debug</i></label>
+    <input type="checkbox" id="node-input-debugFlag" checked="checked" style="display: inline-block; width: auto; vertical-align: top;">
+  </div>
+</script>

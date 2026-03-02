@@ -1,0 +1,145 @@
+<script type="text/html" data-template-name="yandex-commander-out">
+  <style>
+      label.label {
+          line-height: 1em;
+      }
+      label.label-long {
+          min-width: 150px;
+          width: 20%;
+      }
+      .online {
+          display: inline-block;
+          width: auto;
+          vertical-align: middle;
+      }
+  </style>
+
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-bookmark"></i>&nbsp;<span data-i18n="label.name"></span></label>
+    <input type="text" id="node-input-name">
+  </div>
+  <div class="form-row">
+    <label for="node-input-token"><i class="fa fa-globe"></i>&nbsp;<span data-i18n="label.login"></span></label>
+    <input type="text" id="node-input-token" placeholder="">
+  </div>
+  <div class="form-row">
+    <label for="node-input-station_id"><i class="fa fa-database"></i>&nbsp;<span data-i18n="label.station"></span></label>
+    <div style="display: inline-block;position: relative;width: 70%;height: 20px;">
+      <div style="position: absolute;left: 0; right: 40px;">
+        <select id="node-input-station_id" data-single="true" style="width: 100%"></select>
+      </div>
+      <div style="text-align: end; display: inline; float: right">
+        <button class="red-ui-button" style="position: absolute;right: 0px;top: 0px;">
+          <i class="fa fa-refresh"></i></button>
+      </div>
+    </div>
+  </div>
+  <div class="form-row">
+    <label for="node-input-input"><i class="fa fa-arrow-circle-o-right"></i>&nbsp;<span data-i18n="label.command"></span></label>
+    <div style="display: inline-block;position: relative;width: 70%;height: 20px;">
+      <div style="position: absolute;left: 0px; right: 0px;">
+        <select id="node-input-input" data-single="true" style="width: 100%">
+          <option value="command" data-i18n="command.player"></option>
+          <option value="voice" data-i18n="command.voice"></option>
+          <option value="tts" data-i18n="command.tts"></option>
+          <option value="homekit" data-i18n="command.homekit"></option>
+          <option value="stopListening" data-i18n="command.stop_listening"></option>
+          <option value="raw" data-i18n="command.raw"></option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!--for homekit-->
+  <div class="form-row command_options command_options-homekit">
+    <label for="node-input-noTrack" class="label-long" style="display: inline-block"><i class="fa fa-podcast"></i>&nbsp;<span data-i18n="label.default_command"></span></label>
+    <input type="text" id="node-input-noTrack" data-i18n="[placeholder]placeholder.play_music" style="display: inline-block;left: 0px; right: 0px; width: 60%; vertical-align: middle;">
+  </div>
+
+  <!--for tts-->
+  <div class="form-row command_options command_options-tts">
+    <label for="node-input-payload" class="l-width"><i class="fa fa-envelope"></i> <span data-i18n="label.text"></span></label>
+    <input type="text" id="node-input-payload" style="width:70%">
+    <input type="hidden" id="node-input-payloadType">
+  </div>
+  <div class="form-row command_options command_options-tts">
+    <label class="label" for='node-input-ttsVoice'>
+      <i class='fa fa-user'></i>&nbsp;<span data-i18n="label.voice"></span>
+      <div class="red-ui-debug-msg-type-string" style="font-size: 10px;">msg.voice</div>
+    </label>
+    <div style="display: inline-block;position: relative;width: 70%;height: 30px;">
+      <div style="position: absolute;left: 0px; right: 0px;">
+        <select id="node-input-ttsVoice" style="width: 100%;vertical-align: top;">
+          <option value="" data-i18n="voice.default"></option>
+          <option value="alyss" data-i18n="voice.alyss"></option>
+          <option value="anton_samokhvalov" data-i18n="voice.anton_samokhvalov"></option>
+          <option value="dude" data-i18n="voice.dude"></option>
+          <option value="ermil" data-i18n="voice.ermil"></option>
+          <option value="ermilov" data-i18n="voice.ermilov"></option>
+          <option value="ermil_with_tuning" data-i18n="voice.ermil_with_tuning"></option>
+          <option value="erkanyavas" data-i18n="voice.erkanyavas"></option>
+          <option value="jane" data-i18n="voice.jane"></option>
+          <option value="kolya" data-i18n="voice.kolya"></option>
+          <option value="kostya" data-i18n="voice.kostya"></option>
+          <option value="levitan" data-i18n="voice.levitan"></option>
+          <option value="nastya" data-i18n="voice.nastya"></option>
+          <option value="nick" data-i18n="voice.nick"></option>
+          <option value="oksana" data-i18n="voice.oksana"></option>
+          <option value="omazh" data-i18n="voice.omazh"></option>
+          <option value="robot" data-i18n="voice.robot"></option>
+          <option value="sasha" data-i18n="voice.sasha"></option>
+          <option value="silaerkan" data-i18n="voice.silaerkan"></option>
+          <option value="smoky" data-i18n="voice.smoky"></option>
+          <option value="tanya" data-i18n="voice.tanya"></option>
+          <option value="tatyana_abramova" data-i18n="voice.tatyana_abramova"></option>
+          <option value="zahar" data-i18n="voice.zahar"></option>
+          <option value="zhenya" data-i18n="voice.zhenya"></option>
+          <option value="zombie" data-i18n="voice.zombie"></option>
+          <option value="voicesearch" data-i18n="voice.voicesearch"></option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="form-row command_options command_options-tts">
+    <label for="node-input-ttsEffect" class="label l-width" style="vertical-align: bottom;">
+      <i class="fa fa-magic"></i> <span data-i18n="label.effect"></span>
+      <div class="red-ui-debug-msg-type-string" style="font-size: 10px;">msg.effect</div>
+    </label>
+    <input type="text" id="node-input-ttsEffect">
+  </div>
+  <div class="form-row command_options command_options-tts">
+    <label for="node-input-volume" class="label label-long">
+      <i class="fa fa-volume-up"></i>&nbsp;<span data-i18n="label.volume"></span>
+      <div class="red-ui-debug-msg-type-string" style="font-size: 10px;">msg.volume</div>
+    </label>
+    <input type="checkbox" id="node-input-volumeFlag" style="display: inline-block; width: auto; vertical-align: top;">
+    <input type="range" id="node-input-volume" name="volume" min="0" max="100" step="1" style="display: inline-block; width: 150px; margin-left: 10px; vertical-align: middle;">
+    <div id="range-label" class='online'><span id="volume-level" class="online"></span><span class="online">%</span></div>
+  </div>
+  <div class="form-row command_options command_options-tts">
+    <label for="node-input-whisper" class="label label-long">
+      <i class="fa fa-deaf"></i>&nbsp;<span data-i18n="label.whisper"></span>
+      <div class="red-ui-debug-msg-type-string" style="font-size: 10px;">msg.whisper</div>
+    </label>
+    <input type="checkbox" id="node-input-whisper" style="display: inline-block; width: auto; vertical-align: top;">
+  </div>
+  <div class="form-row command_options command_options-tts">
+    <label for="node-input-stopListening" class="label label-long">
+      <i class="fa fa-deaf"></i>&nbsp;<span data-i18n="label.prevent_listening"></span>
+      <div class="red-ui-debug-msg-type-string" style="font-size: 10px;">msg.prevent_listening</div>
+    </label>
+    <input type="checkbox" id="node-input-stopListening" style="display: inline-block; width: auto; vertical-align: top;">
+  </div>
+  <div class="form-row command_options command_options-tts">
+    <label for="node-input-pauseMusic" class="label label-long">
+      <i class="fa fa-pause"></i>&nbsp;<span data-i18n="label.pause_while_tts"></span>
+      <div class="red-ui-debug-msg-type-string" style="font-size: 10px;">msg.pause_music</div>
+    </label>
+    <input type="checkbox" id="node-input-pauseMusic" style="display: inline-block; width: auto; vertical-align: top;">
+  </div>
+
+  <div class="form-row" style="vertical-align:bottom;">
+    <label for='node-input-debugFlag' class="label-long"><i class='fa fa-share-square'></i>&nbsp;<span data-i18n="label.debug"></span></label>
+    <input type="checkbox" id="node-input-debugFlag" checked="checked" style="display: inline-block; width: auto; vertical-align: top;">
+  </div>
+</script>
