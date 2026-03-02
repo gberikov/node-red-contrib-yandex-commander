@@ -1,0 +1,69 @@
+{
+    "label": {
+        "name": "Nom",
+        "text": "Texte",
+        "effect": "Effet",
+        "login": "Connexion",
+        "station": "Station",
+        "voice": "Voix",
+        "debug": "Débogage",
+        "command": "Commande",
+        "volume": "Volume",
+        "prevent_listening": "Ne pas attendre de réponse",
+        "pause_while_tts": "Pause pendant la synthèse",
+        "whisper": "Chuchotement",
+        "default_command": "Commande par défaut"
+    },
+    "placeholder": {
+        "name": "Nom",
+        "play_music": "Jouer de la musique"
+    },
+    "command": {
+        "player": "Lecteur",
+        "tts": "Synthèse vocale",
+        "voice": "Commande vocale",
+        "raw": "Commande brute",
+        "stop_listening": "Arrêter d'écouter",
+        "homekit": "HomeKit"
+    },
+    "voice": {
+        "default": "Par défaut",
+        "alena": "Alena",
+        "alyss": "Alyss",
+        "anton_samokhvalov": "Anton Samokhvalov",
+        "dude": "Dude",
+        "ermil": "Ermil",
+        "ermilov": "Ermilov",
+        "ermil_with_tuning": "Ermil (réglage)",
+        "erkanyavas": "Erkanyavas",
+        "filipp": "Filipp",
+        "jane": "Jane",
+        "kolya": "Kolya",
+        "kostya": "Kostya",
+        "levitan": "Levitan",
+        "nastya": "Nastya",
+        "nick": "Nick",
+        "oksana": "Oksana",
+        "omazh": "Omazh",
+        "robot": "Robot",
+        "sasha": "Sasha",
+        "silaerkan": "Silaerkan",
+        "smoky": "Smoky",
+        "tanya": "Tanya",
+        "tatyana_abramova": "Tatyana Abramova",
+        "zahar": "Zahar",
+        "zhenya": "Zhenya",
+        "zombie": "Zombie",
+        "voicesearch": "Voicesearch"
+    },
+    "effect": {
+        "none": "Aucun",
+        "behind_the_wall": "Derrière le mur",
+        "hamster": "Hamster",
+        "megaphone": "Mégaphone",
+        "pitch_down": "Voix grave",
+        "psychodelic": "Psychédélique",
+        "pulse": "Pulsation",
+        "train_announce": "Haut-parleur de gare"
+    }
+}

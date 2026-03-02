@@ -1,0 +1,17 @@
+{
+    "label": {
+        "name": "名稱",
+        "login": "連線",
+        "station": "音箱",
+        "output": "輸出",
+        "homekit_format": "HomeKit 格式"
+    },
+    "output": {
+        "status": "完整狀態",
+        "homekit": "HomeKit 格式"
+    },
+    "homekit": {
+        "speaker": "智慧音箱",
+        "tv": "電視"
+    }
+}

@@ -1,0 +1,37 @@
+{
+    "label": {
+        "name": "Nome",
+        "login": "Conexão",
+        "station": "Estação",
+        "ip_address": "Endereço IP",
+        "phrase": "Frase para dizer"
+    },
+    "placeholder": {
+        "phrase": "Já estou dormindo"
+    },
+    "section": {
+        "connection": "Conexão com o dispositivo",
+        "network": "Rede",
+        "kid_control": "Controle infantil"
+    },
+    "button": {
+        "enabled": "Ativado",
+        "disabled": "Desativado",
+        "auto": "Automático",
+        "manual": "Manual"
+    },
+    "schedule": {
+        "active": "Ativo",
+        "from": "De",
+        "to": "Até"
+    },
+    "day": {
+        "monday": "Segunda-feira",
+        "tuesday": "Terça-feira",
+        "wednesday": "Quarta-feira",
+        "thursday": "Quinta-feira",
+        "friday": "Sexta-feira",
+        "saturday": "Sábado",
+        "sunday": "Domingo"
+    }
+}

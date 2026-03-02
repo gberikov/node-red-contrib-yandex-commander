@@ -1,0 +1,37 @@
+{
+    "label": {
+        "name": "名前",
+        "login": "ログイン",
+        "station": "ステーション",
+        "ip_address": "IPアドレス",
+        "phrase": "発話フレーズ"
+    },
+    "placeholder": {
+        "phrase": "もう寝ています"
+    },
+    "section": {
+        "connection": "デバイス接続",
+        "network": "ネットワーク",
+        "kid_control": "キッズコントロール"
+    },
+    "button": {
+        "enabled": "有効",
+        "disabled": "無効",
+        "auto": "自動",
+        "manual": "手動"
+    },
+    "schedule": {
+        "active": "アクティブ",
+        "from": "開始",
+        "to": "終了"
+    },
+    "day": {
+        "monday": "月曜日",
+        "tuesday": "火曜日",
+        "wednesday": "水曜日",
+        "thursday": "木曜日",
+        "friday": "金曜日",
+        "saturday": "土曜日",
+        "sunday": "日曜日"
+    }
+}

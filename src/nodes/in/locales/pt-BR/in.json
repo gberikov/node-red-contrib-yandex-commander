@@ -1,0 +1,18 @@
+{
+    "label": {
+        "name": "Nome",
+        "login": "Conexão",
+        "station": "Estação",
+        "output": "Saída",
+        "homekit_format": "Formato HomeKit",
+        "unique_messages": "Mensagens únicas"
+    },
+    "output": {
+        "status": "Mensagem de status completa",
+        "homekit": "Formato HomeKit"
+    },
+    "homekit": {
+        "speaker": "Alto-falante inteligente",
+        "tv": "Televisão"
+    }
+}

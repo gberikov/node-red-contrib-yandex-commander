@@ -1,0 +1,18 @@
+{
+    "label": {
+        "name": "Nom",
+        "login": "Connexion",
+        "station": "Station",
+        "output": "Sortie",
+        "homekit_format": "Format HomeKit",
+        "unique_messages": "Messages uniques"
+    },
+    "output": {
+        "status": "Message de statut complet",
+        "homekit": "Format HomeKit"
+    },
+    "homekit": {
+        "speaker": "Enceinte connectée",
+        "tv": "Télévision"
+    }
+}

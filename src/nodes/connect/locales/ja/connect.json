@@ -1,0 +1,17 @@
+{
+    "label": {
+        "name": "名前",
+        "token": "OAuthトークン"
+    },
+    "qr": {
+        "title": "QRコード認証",
+        "button": "QRでトークンを取得",
+        "initializing": "初期化中...",
+        "scan_prompt": "YandexアプリまたはYandex Key (ID) でQRコードをスキャンしてください",
+        "token_received": "トークンを取得しました！",
+        "status_error": "認証ステータスの確認中にエラーが発生しました",
+        "timeout": "タイムアウトしました。もう一度お試しください",
+        "unknown_error": "不明なエラー",
+        "retry": "再試行"
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "label": {
+        "name": "Nom",
+        "token": "Jeton OAuth"
+    },
+    "qr": {
+        "title": "Autorisation par QR code",
+        "button": "Obtenir le jeton par QR",
+        "initializing": "Initialisation...",
+        "scan_prompt": "Scannez le QR code avec l'application Yandex ou Yandex Key (ID)",
+        "token_received": "Jeton reçu !",
+        "status_error": "Erreur lors de la vérification du statut d'autorisation",
+        "timeout": "Délai expiré, veuillez réessayer",
+        "unknown_error": "Erreur inconnue",
+        "retry": "Réessayer"
+    }
+}

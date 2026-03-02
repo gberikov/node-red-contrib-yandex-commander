@@ -1,0 +1,17 @@
+{
+    "label": {
+        "name": "名称",
+        "token": "OAuth 令牌"
+    },
+    "qr": {
+        "title": "二维码授权",
+        "button": "通过二维码获取令牌",
+        "initializing": "正在初始化...",
+        "scan_prompt": "使用 Yandex 应用或 Yandex Key (ID) 扫描二维码",
+        "token_received": "令牌已获取！",
+        "status_error": "检查授权状态时出错",
+        "timeout": "已超时，请重试",
+        "unknown_error": "未知错误",
+        "retry": "重试"
+    }
+}

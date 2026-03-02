@@ -1,0 +1,18 @@
+{
+    "label": {
+        "name": "名前",
+        "login": "ログイン",
+        "station": "ステーション",
+        "output": "出力",
+        "homekit_format": "HomeKit形式",
+        "unique_messages": "ユニークメッセージ"
+    },
+    "output": {
+        "status": "完全なステータスメッセージ",
+        "homekit": "HomeKit形式"
+    },
+    "homekit": {
+        "speaker": "スマートスピーカー",
+        "tv": "テレビ"
+    }
+}

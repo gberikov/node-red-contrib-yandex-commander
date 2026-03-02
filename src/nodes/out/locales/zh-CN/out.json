@@ -1,0 +1,69 @@
+{
+    "label": {
+        "name": "名称",
+        "text": "文本",
+        "effect": "效果",
+        "login": "登录",
+        "station": "音箱",
+        "voice": "语音",
+        "debug": "调试",
+        "command": "命令",
+        "volume": "音量",
+        "prevent_listening": "不等待回应",
+        "pause_while_tts": "TTS 时暂停播放",
+        "whisper": "耳语",
+        "default_command": "默认命令"
+    },
+    "placeholder": {
+        "name": "名称",
+        "play_music": "播放音乐"
+    },
+    "command": {
+        "player": "播放器",
+        "tts": "文本转语音",
+        "voice": "语音命令",
+        "raw": "原始命令",
+        "stop_listening": "停止监听",
+        "homekit": "HomeKit"
+    },
+    "voice": {
+        "default": "默认",
+        "alena": "Alena",
+        "alyss": "Alyss",
+        "anton_samokhvalov": "Anton Samokhvalov",
+        "dude": "Dude",
+        "ermil": "Ermil",
+        "ermilov": "Ermilov",
+        "ermil_with_tuning": "Ermil（调音）",
+        "erkanyavas": "Erkanyavas",
+        "filipp": "Filipp",
+        "jane": "Jane",
+        "kolya": "Kolya",
+        "kostya": "Kostya",
+        "levitan": "Levitan",
+        "nastya": "Nastya",
+        "nick": "Nick",
+        "oksana": "Oksana",
+        "omazh": "Omazh",
+        "robot": "机器人",
+        "sasha": "Sasha",
+        "silaerkan": "Silaerkan",
+        "smoky": "Smoky",
+        "tanya": "Tanya",
+        "tatyana_abramova": "Tatyana Abramova",
+        "zahar": "Zahar",
+        "zhenya": "Zhenya",
+        "zombie": "僵尸",
+        "voicesearch": "Voicesearch"
+    },
+    "effect": {
+        "none": "无",
+        "behind_the_wall": "隔墙",
+        "hamster": "仓鼠",
+        "megaphone": "扩音器",
+        "pitch_down": "低音",
+        "psychodelic": "迷幻",
+        "pulse": "脉冲",
+        "train_announce": "车站广播"
+    }
+}

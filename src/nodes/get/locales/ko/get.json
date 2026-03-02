@@ -1,0 +1,17 @@
+{
+    "label": {
+        "name": "이름",
+        "login": "연결",
+        "station": "스테이션",
+        "output": "출력",
+        "homekit_format": "HomeKit 형식"
+    },
+    "output": {
+        "status": "전체 상태",
+        "homekit": "HomeKit 형식"
+    },
+    "homekit": {
+        "speaker": "스마트 스피커",
+        "tv": "텔레비전"
+    }
+}

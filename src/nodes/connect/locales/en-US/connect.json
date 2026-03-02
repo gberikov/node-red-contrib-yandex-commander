@@ -1,0 +1,17 @@
+{
+    "label": {
+        "name": "Name",
+        "token": "OAuth Token"
+    },
+    "qr": {
+        "title": "QR Code Authorization",
+        "button": "Get token via QR",
+        "initializing": "Initializing...",
+        "scan_prompt": "Scan the QR code with the Yandex app or Yandex Key (ID)",
+        "token_received": "Token received!",
+        "status_error": "Error checking authorization status",
+        "timeout": "Timed out, please try again",
+        "unknown_error": "Unknown error",
+        "retry": "Retry"
+    }
+}

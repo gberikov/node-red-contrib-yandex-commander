@@ -1,0 +1,37 @@
+{
+    "label": {
+        "name": "Название",
+        "login": "Логин",
+        "station": "Станция",
+        "ip_address": "IP адрес",
+        "phrase": "Фраза"
+    },
+    "placeholder": {
+        "phrase": "Я уже сплю"
+    },
+    "section": {
+        "connection": "Подключение к устройству",
+        "network": "Сеть",
+        "kid_control": "Детский контроль"
+    },
+    "button": {
+        "enabled": "Включено",
+        "disabled": "Отключено",
+        "auto": "Авто",
+        "manual": "Вручную"
+    },
+    "schedule": {
+        "active": "Активно",
+        "from": "С",
+        "to": "До"
+    },
+    "day": {
+        "monday": "Понедельник",
+        "tuesday": "Вторник",
+        "wednesday": "Среда",
+        "thursday": "Четверг",
+        "friday": "Пятница",
+        "saturday": "Суббота",
+        "sunday": "Воскресенье"
+    }
+}

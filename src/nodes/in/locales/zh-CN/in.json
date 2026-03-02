@@ -1,0 +1,18 @@
+{
+    "label": {
+        "name": "名称",
+        "login": "登录",
+        "station": "音箱",
+        "output": "输出",
+        "homekit_format": "HomeKit 格式",
+        "unique_messages": "唯一消息"
+    },
+    "output": {
+        "status": "完整状态消息",
+        "homekit": "HomeKit 格式"
+    },
+    "homekit": {
+        "speaker": "智能音箱",
+        "tv": "电视"
+    }
+}

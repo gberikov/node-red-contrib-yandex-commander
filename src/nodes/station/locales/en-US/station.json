@@ -1,0 +1,37 @@
+{
+    "label": {
+        "name": "Name",
+        "login": "Login",
+        "station": "Station",
+        "ip_address": "IP address",
+        "phrase": "Phrase to say"
+    },
+    "placeholder": {
+        "phrase": "I'm already sleeping"
+    },
+    "section": {
+        "connection": "Connection to device",
+        "network": "Network",
+        "kid_control": "Kid Control"
+    },
+    "button": {
+        "enabled": "Enabled",
+        "disabled": "Disabled",
+        "auto": "Auto",
+        "manual": "Manual"
+    },
+    "schedule": {
+        "active": "Active",
+        "from": "From",
+        "to": "To"
+    },
+    "day": {
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday",
+        "sunday": "Sunday"
+    }
+}
