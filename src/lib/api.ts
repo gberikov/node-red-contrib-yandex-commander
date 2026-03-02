@@ -1,5 +1,5 @@
-import axios, { AxiosInstance } from 'axios';
-import { DevicesResponse } from './api/device';
+import axios, { type AxiosInstance } from 'axios';
+import type { DevicesResponse } from './api/device';
 
 export interface LocalTokenResponse {
   token: string;

@@ -1,43 +1,40 @@
 <script type="text/html" data-template-name="yandex-commander-out">
-  <style>
-      label.label {
-          line-height: 1em;
-      }
-      label.label-long {
-          min-width: 150px;
-          width: 20%;
-      }
-      .online {
-          display: inline-block;
-          width: auto;
-          vertical-align: middle;
-      }
-  </style>
-
   <div class="form-row">
-    <label for="node-input-name"><i class="fa fa-bookmark"></i>&nbsp;<span data-i18n="label.name"></span></label>
+    <label for="node-input-name">
+      <i class="fa fa-tag"></i>
+      <span data-i18n="label.name"></span>
+    </label>
     <input type="text" id="node-input-name">
   </div>
   <div class="form-row">
-    <label for="node-input-token"><i class="fa fa-globe"></i>&nbsp;<span data-i18n="label.login"></span></label>
+    <label for="node-input-token">
+      <i class="fa fa-key"></i>
+      <span data-i18n="label.login"></span>
+    </label>
     <input type="text" id="node-input-token" placeholder="">
   </div>
   <div class="form-row">
-    <label for="node-input-station_id"><i class="fa fa-database"></i>&nbsp;<span data-i18n="label.station"></span></label>
+    <label for="node-input-station_id">
+      <i class="fa fa-volume-down"></i>
+      <span data-i18n="label.station"></span>
+    </label>
     <div style="display: inline-block;position: relative;width: 70%;height: 20px;">
       <div style="position: absolute;left: 0; right: 40px;">
         <select id="node-input-station_id" data-single="true" style="width: 100%"></select>
       </div>
       <div style="text-align: end; display: inline; float: right">
-        <button class="red-ui-button" style="position: absolute;right: 0px;top: 0px;">
+        <button class="red-ui-button" style="position: absolute;right: 0;top: 0;">
           <i class="fa fa-refresh"></i></button>
       </div>
     </div>
   </div>
   <div class="form-row">
-    <label for="node-input-input"><i class="fa fa-arrow-circle-o-right"></i>&nbsp;<span data-i18n="label.command"></span></label>
+    <label for="node-input-input">
+      <i class="fa fa-gear"></i>
+      <span data-i18n="label.command"></span>
+    </label>
     <div style="display: inline-block;position: relative;width: 70%;height: 20px;">
-      <div style="position: absolute;left: 0px; right: 0px;">
+      <div style="position: absolute;left: 0; right: 0;">
         <select id="node-input-input" data-single="true" style="width: 100%">
           <option value="command" data-i18n="command.player"></option>
           <option value="voice" data-i18n="command.voice"></option>
@@ -53,7 +50,7 @@
   <!--for homekit-->
   <div class="form-row command_options command_options-homekit">
     <label for="node-input-noTrack" class="label-long" style="display: inline-block"><i class="fa fa-podcast"></i>&nbsp;<span data-i18n="label.default_command"></span></label>
-    <input type="text" id="node-input-noTrack" data-i18n="[placeholder]placeholder.play_music" style="display: inline-block;left: 0px; right: 0px; width: 60%; vertical-align: middle;">
+    <input type="text" id="node-input-noTrack" data-i18n="[placeholder]placeholder.play_music" style="display: inline-block;left: 0; right: 0; width: 60%; vertical-align: middle;">
   </div>
 
   <!--for tts-->
@@ -68,7 +65,7 @@
       <div class="red-ui-debug-msg-type-string" style="font-size: 10px;">msg.voice</div>
     </label>
     <div style="display: inline-block;position: relative;width: 70%;height: 30px;">
-      <div style="position: absolute;left: 0px; right: 0px;">
+      <div style="position: absolute;left: 0; right: 0;">
         <select id="node-input-ttsVoice" style="width: 100%;vertical-align: top;">
           <option value="" data-i18n="voice.default"></option>
           <option value="alyss" data-i18n="voice.alyss"></option>
@@ -138,8 +135,4 @@
     <input type="checkbox" id="node-input-pauseMusic" style="display: inline-block; width: auto; vertical-align: top;">
   </div>
 
-  <div class="form-row" style="vertical-align:bottom;">
-    <label for='node-input-debugFlag' class="label-long"><i class='fa fa-share-square'></i>&nbsp;<span data-i18n="label.debug"></span></label>
-    <input type="checkbox" id="node-input-debugFlag" checked="checked" style="display: inline-block; width: auto; vertical-align: top;">
-  </div>
 </script>

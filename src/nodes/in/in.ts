@@ -1,6 +1,6 @@
 import { NodeInitializer } from 'node-red';
-import { StationHelper } from '../../lib/stationHelper';
-import { InNodeConfig, ConnectNode, NodeStatusData, DeviceState } from '../../lib/types';
+import { preparePayload } from '@/lib/stationHelper';
+import { InNodeConfig, ConnectNode, NodeStatusData, DeviceState } from '@/lib/types';
 
 const nodeInit: NodeInitializer = (RED) => {
   /**
@@ -14,20 +14,12 @@ const nodeInit: NodeInitializer = (RED) => {
     node.controller = RED.nodes.getNode(config.token) as ConnectNode | null;
     node.stationId = config.station_id;
     node.output = config.output;
-    node.debugFlag = config.debugFlag;
     node.uniqueFlag = config.uniqueFlag;
     node.homekitFormat = config.homekitFormat;
     node.lastMessage = {};
     node.status({});
 
-    /** Выводит отладочное сообщение в лог */
-    function debugMessage(text: string): void {
-      if (node.debugFlag) {
-        node.log(text);
-      }
-    }
-
-    debugMessage(`Node settings: ID: ${node.stationId}, Output Format: ${node.output}, HK: ${node.homekitFormat}`);
+    node.debug(`Node settings: ID: ${node.stationId}, Output Format: ${node.output}, HK: ${node.homekitFormat}`);
 
     /** Отправляет сообщение на выход ноды; в режиме homekit + uniqueFlag фильтрует дубликаты */
     function sendMessage(message: any): void {
@@ -35,7 +27,7 @@ const nodeInit: NodeInitializer = (RED) => {
         if (JSON.stringify(node.lastMessage.payload) !== JSON.stringify(message.payload)) {
           node.send(message);
           node.lastMessage = message;
-          debugMessage(`Sent message to Homekit: ${JSON.stringify(message)}`);
+          node.debug(`Sent message to Homekit: ${JSON.stringify(message)}`);
         }
       } else {
         node.send(message);
@@ -44,7 +36,7 @@ const nodeInit: NodeInitializer = (RED) => {
 
     /** Обработчик WS-сообщения: подготавливает payload и отправляет на выход */
     node.onMessage = function (data: DeviceState): void {
-      sendMessage(StationHelper.preparePayload(node, data));
+      sendMessage(preparePayload(node, data));
     };
 
     /** Обновляет визуальный статус ноды в редакторе */

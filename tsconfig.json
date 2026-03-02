@@ -2,46 +2,26 @@
   "compilerOptions": {
     "outDir": "./build",
     "rootDir": "./src",
-    "target": "ES2018",
+    "target": "ES2021",
     "module": "CommonJS",
-    "lib": [
-      "es2018",
-      "DOM"
-    ],
-    "allowJs": false,
-    "noEmitOnError": false,
-    "removeComments": false,
-    "noEmit": false,
-    "importHelpers": false,
-    "preserveWatchOutput": true,
-    "strict": false,
-    "noImplicitAny": false,
-    "strictNullChecks": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noFallthroughCasesInSwitch": true,
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
+    "lib": ["ES2021"],
+    "moduleResolution": "node10",
     "esModuleInterop": true,
-    "preserveConstEnums": true,
+    "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "sourceMap": false,
     "resolveJsonModule": true,
-    "noImplicitReturns": false,
-    "typeRoots": [
-      "./node_modules/@types"
-    ],
+    "strict": false,
+    "noFallthroughCasesInSwitch": true,
+    "preserveConstEnums": true,
+    "preserveWatchOutput": true,
+    "typeRoots": ["./node_modules/@types"],
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "src/*"
-      ]
+      "@/*": ["src/*"]
     }
   },
-  "include": [
-    "src/**/*"
-  ],
+  "include": ["src/**/*"],
   "exclude": [
     "src/**/html/editor.ts",
     "src/**/*.html",

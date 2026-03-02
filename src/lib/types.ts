@@ -1,4 +1,4 @@
-import { Node, NodeDef } from 'node-red';
+import type { Node, NodeDef } from 'node-red';
 
 // ── Node Status ──
 
@@ -64,6 +64,10 @@ export interface RuntimeDevice {
       server_certificate: string;
       server_private_key: string;
     };
+  };
+  networkInfo?: {
+    ip_addresses: string[];
+    external_port: number;
   };
 }
 
@@ -156,12 +160,10 @@ export interface ConnectCredentials {
 }
 
 export interface ConnectNodeConfig extends NodeDef {
-  debugFlag: boolean;
 }
 
 export interface ConnectNode extends Node<ConnectCredentials> {
   token: string;
-  debugFlag: boolean;
   deviceList: RuntimeDevice[];
   readyList: ReadyDevice[];
   activeStationList: ActiveStation[];
@@ -183,7 +185,6 @@ export interface StationNodeConfig extends NodeDef {
   fixedAddress: string;
   fixedPort: string;
   connectionFlag: boolean;
-  debugFlag: boolean;
 }
 
 // ── Get Node Interfaces ──
@@ -192,7 +193,6 @@ export interface GetNodeConfig extends NodeDef {
   token: string;
   station_id: string;
   output: string;
-  debugFlag: boolean;
   homekitFormat: string;
 }
 
@@ -202,7 +202,6 @@ export interface InNodeConfig extends NodeDef {
   token: string;
   station_id: string;
   output: string;
-  debugFlag: boolean;
   uniqueFlag: boolean;
   homekitFormat: string;
 }
@@ -213,7 +212,6 @@ export interface OutNodeConfig extends NodeDef {
   token: string;
   station_id: string;
   input: string;
-  debugFlag: boolean;
   volumeFlag: boolean;
   volume: number;
   stopListening: boolean;

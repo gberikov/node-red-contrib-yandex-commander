@@ -1,5 +1,5 @@
 import { NodeInitializer } from 'node-red';
-import { OutNodeConfig, ConnectNode, NodeStatusData } from '../../lib/types';
+import { OutNodeConfig, ConnectNode, NodeStatusData } from '@/lib/types';
 
 const nodeInit: NodeInitializer = (RED) => {
   /**
@@ -15,7 +15,6 @@ const nodeInit: NodeInitializer = (RED) => {
 
     node.input = config.input;
     node.stationId = config.station_id;
-    node.debugFlag = config.debugFlag;
     node.volumeFlag = config.volumeFlag;
     node.volume = config.volume;
     node.stopListening = config.stopListening;
@@ -26,14 +25,7 @@ const nodeInit: NodeInitializer = (RED) => {
     node.whisper = config.whisper;
     node.status({});
 
-    /** Выводит отладочное сообщение в лог */
-    function debugMessage(text: string): void {
-      if (node.debugFlag) {
-        node.log(text);
-      }
-    }
-
-    debugMessage(node.stationId);
+    node.debug(node.stationId);
 
     /**
      * Обработчик входящего сообщения.
@@ -41,7 +33,7 @@ const nodeInit: NodeInitializer = (RED) => {
      * Для остальных типов: пробрасывает payload и hap напрямую.
      */
     node.on('input', (input: any) => {
-      debugMessage(`input: ${JSON.stringify(input)}`);
+      node.debug(`input: ${JSON.stringify(input)}`);
 
       if (node.stationId) {
         const data: any = {};
@@ -55,7 +47,7 @@ const nodeInit: NodeInitializer = (RED) => {
 
         // redefine options from input
         if ('volume' in input) data.volume = input.volume / 100;
-        if ('whisper' in input) data.whisper = input.whisper ? true : false;
+        if ('whisper' in input) data.whisper = !!input.whisper;
         if ('voice' in input) node.ttsVoice = input.voice;
         if ('effect' in input) node.ttsEffect = input.effect;
         if ('prevent_listening' in input) data.noTrackPhrase = input.prevent_listening;
@@ -67,14 +59,14 @@ const nodeInit: NodeInitializer = (RED) => {
             case 'flow': {
               payload = node.context().flow.get(node.config.payload);
               if (typeof payload === 'undefined') {
-                debugMessage('Empty flow context with key ' + node.config.payload);
+                node.debug(`Empty flow context with key ${node.config.payload}`);
               }
               break;
             }
             case 'global': {
               payload = node.context().global.get(node.config.payload);
               if (typeof payload === 'undefined') {
-                debugMessage('Empty global context with key ' + node.config.payload);
+                node.debug(`Empty global context with key ${node.config.payload}`);
               }
               break;
             }
@@ -87,7 +79,7 @@ const nodeInit: NodeInitializer = (RED) => {
                 const arr = JSON.parse(node.config.payload);
                 payload = arr[(Math.random() * arr.length) | 0];
               } catch (e) {
-                debugMessage('Error on parsing input JSON: ' + e);
+                node.debug(`Error on parsing input JSON: ${e}`);
               }
               break;
             }
@@ -118,24 +110,24 @@ const nodeInit: NodeInitializer = (RED) => {
 
           if (data.payload.length > 0) {
             node.controller.sendMessage(node.stationId, node.input, data);
-            debugMessage(`Sending data: station: ${node.stationId}, input type: ${node.input}, data: ${JSON.stringify(data)}`);
+            node.debug(`Sending data: station: ${node.stationId}, input type: ${node.input}, data: ${JSON.stringify(data)}`);
           } else {
-            debugMessage('Nothing to send. Check input and parameters');
+            node.debug('Nothing to send. Check input and parameters');
           }
         } else {
           data.payload = input.payload;
           data.hap = input.hap;
           node.controller.sendMessage(node.stationId, node.input, data);
-          debugMessage(`Sending data: station: ${node.stationId}, input type: ${node.input}, data: ${JSON.stringify(data)}`);
+          node.debug(`Sending data: station: ${node.stationId}, input type: ${node.input}, data: ${JSON.stringify(data)}`);
         }
       } else {
-        debugMessage('node.stationId is empty');
+        node.debug('node.stationId is empty');
       }
     });
 
     /** Обновляет визуальный статус ноды в редакторе */
     node.onStatus = function (data: NodeStatusData): void {
-      debugMessage(`Status: ${JSON.stringify(data)}`);
+      node.debug(`Status: ${JSON.stringify(data)}`);
       if (data) {
         node.status({ fill: data.color, shape: 'dot', text: data.text });
       }

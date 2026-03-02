@@ -13,9 +13,6 @@ RED.nodes.registerType('yandex-commander-station', {
     station_id: {
       required: true
     },
-    debugFlag: {
-      value: false
-    },
     connectionFlag: {
       value: true
     },
@@ -62,16 +59,44 @@ RED.nodes.registerType('yandex-commander-station', {
   oneditsave: onSave
 });
 
+/** Получает список устройств: сначала пробует per-node endpoint, при неудаче — статический POST */
+function fetchDevices(configNodeId: string, callback: (devices: any[]) => void) {
+  const config = RED.nodes.node(configNodeId);
+  if (!config) return;
+  $.getJSON(`stations/${config.id}`, function (data: any) {
+    if (data.devices && data.devices.length > 0) {
+      callback(data.devices);
+    } else {
+      fetchDevicesByToken(config, callback);
+    }
+  }).fail(function () {
+    fetchDevicesByToken(config, callback);
+  });
+}
+
+function fetchDevicesByToken(config: any, callback: (devices: any[]) => void) {
+  const token = (config.credentials && config.credentials.token) || $('#node-config-input-token').val();
+  if (!token) return;
+  $.ajax({
+    url: 'yandex-commander/devices',
+    method: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify({ token }),
+    success: function (data: any) {
+      if (data.devices) callback(data.devices);
+    }
+  });
+}
+
 /** Обновляет выпадающий список станций из API connect-ноды */
 function onRefresh() {
-  const config = RED.nodes.node($('#node-input-token').val());
   const selector = $('#node-input-station_id');
   const currentId = selector.data('station_id');
 
   selector.empty();
-  $.getJSON('stations/' + config.id, function (data: any) {
-    data.devices.forEach((device: any) => {
-      selector.append(`<option value="${device.id}">${device.name}(${device.id})</option>`);
+  fetchDevices($('#node-input-token').val(), function (devices) {
+    devices.forEach((device: any) => {
+      selector.append(`<option value="${device.id}">${device.name} (${device.id})</option>`);
       $(`#node-input-station_id option[value=${currentId}]`).attr('selected', true);
       currentId == device.id && device.address ? $('#node-input-fixedAddress').attr('placeholder', device.address) : $('#node-input-fixedAddress').attr('placeholder', '0.0.0.0');
       currentId == device.id && device.port ? $('#node-input-fixedPort').attr('placeholder', device.port) : $('#node-input-fixedPort').attr('placeholder', '1961');
@@ -87,22 +112,31 @@ function onOpen(this: any) {
   const currentId = this.station_id;
   selector.data('station_id', currentId);
 
-  $.getJSON('stations/' + config.id, function (data: any) {
-    data.devices.forEach((device: any) => {
-      selector.append(`<option value="${device.id}">${device.name}(${device.id})</option>`);
-      $(`#node-input-station_id :contains(${currentId})`).attr('selected', true);
-      currentId == device.id && device.address ? $('#node-input-fixedAddress').attr('placeholder', device.address) : $('#node-input-fixedAddress').attr('placeholder', '0.0.0.0');
-      currentId == device.id && device.port ? $('#node-input-fixedPort').attr('placeholder', device.port) : $('#node-input-fixedPort').attr('placeholder', '1961');
+  function loadDevices() {
+    selector.empty();
+    fetchDevices($('#node-input-token').val(), function (devices) {
+      devices.forEach((device: any) => {
+        selector.append(`<option value="${device.id}">${device.name} (${device.id})</option>`);
+        $(`#node-input-station_id :contains(${currentId})`).attr('selected', true);
+        currentId == device.id && device.address ? $('#node-input-fixedAddress').attr('placeholder', device.address) : $('#node-input-fixedAddress').attr('placeholder', '0.0.0.0');
+        currentId == device.id && device.port ? $('#node-input-fixedPort').attr('placeholder', device.port) : $('#node-input-fixedPort').attr('placeholder', '1961');
+      });
     });
-  });
+  }
+
+  loadDevices();
+
+  $('#node-input-token').on('change', loadDevices);
 
   $('#node-input-station_id').on('change', function () {
     const selectedId = $('#node-input-station_id').val();
     if (selectedId) {
-      $.getJSON('yandexdevices_' + config.id, function (data: any) {
-        const device = data.devices.find((dev: any) => dev.id == selectedId);
-        $('#node-input-fixedAddress').attr('placeholder', device.address);
-        $('#node-input-fixedPort').attr('placeholder', device.port);
+      fetchDevices($('#node-input-token').val(), function (devices) {
+        const device = devices.find((dev: any) => dev.id == selectedId);
+        if (device) {
+          $('#node-input-fixedAddress').attr('placeholder', device.address || '0.0.0.0');
+          $('#node-input-fixedPort').attr('placeholder', device.port || '1961');
+        }
       });
     }
   });
@@ -112,9 +146,9 @@ function onOpen(this: any) {
   for (let i = 0; i <= 1440; i += 15) {
     let hours: string = String(Math.floor(i / 60));
     let minutes: string = String(i % 60);
-    hours = Number(hours) < 10 ? '0' + hours : hours;
-    minutes = Number(minutes) < 10 ? '0' + minutes : minutes;
-    times[i] = hours + ':' + minutes;
+    hours = Number(hours) < 10 ? `0${hours}` : hours;
+    minutes = Number(minutes) < 10 ? `0${minutes}` : minutes;
+    times[i] = `${hours}:${minutes}`;
   }
   const sheduler = this.sheduler || [];
 
@@ -128,8 +162,8 @@ function onOpen(this: any) {
     const toSelect = $(block).children('select').last();
     $(checkbox).prop('checked', activeFlag);
     $.each(times, function (key: string, value: string) {
-      $(fromSelect).append('<option value="' + key + '">' + value + '</option>');
-      $(toSelect).append('<option value="' + key + '">' + value + '</option>');
+      $(fromSelect).append(`<option value="${key}">${value}</option>`);
+      $(toSelect).append(`<option value="${key}">${value}</option>`);
     });
     $(`#${fromSelect.attr('id')} option:last`).remove();
     $(`#${toSelect.attr('id')} option:first`).remove();
@@ -184,8 +218,8 @@ function onOpen(this: any) {
     } else if (pressedButtonId == 'manualButton') {
       $('#address-block').show();
       const selectedId = $('#node-input-station_id').val();
-      if (selectedId) {
-        $.getJSON('yandexdevices_' + config.id, function (data: any) {
+      if (selectedId && config) {
+        $.getJSON(`yandexdevices_${config.id}`, function (data: any) {
           const device = data.devices.find((dev: any) => dev.id == selectedId);
           $('#node-input-fixedAddress').attr('placeholder', device.address);
           $('#node-input-fixedPort').attr('placeholder', device.port);

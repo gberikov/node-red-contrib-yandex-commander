@@ -1,43 +1,38 @@
 <script type="text/html" data-template-name="yandex-commander-connect">
   <style>
-      .label-long {min-width: 150px;width: 20%;}
-      .online {display: inline-block; width: auto; vertical-align: middle;}
+      .label-long {
+          min-width: 150px;
+          width: 20%;
+      }
+
+      .online {
+          display: inline-block;
+          width: auto;
+          vertical-align: middle;
+      }
   </style>
   <div class="form-row">
-    <label for="node-config-input-name"><i class="fa fa-bookmark"></i> Name</label>
+    <label for="node-config-input-name">
+      <i class="fa fa-tag"></i>
+      <span data-i18n="label.name"></span>
+    </label>
     <input type="text" id="node-config-input-name">
   </div>
   <div class="form-row">
-    <label for="node-config-input-token"><i class="fa fa-bookmark"></i> oAuthToken</label>
+    <label for="node-config-input-token">
+      <i class="fa fa-key"></i>
+      <span data-i18n="label.token"></span>
+    </label>
     <input type="text" id="node-config-input-token">
   </div>
-  <div class="form-row">
-    <label for='node-config-input-debugFlag' style="min-width: 110px; width: 20%;"><i class='fa fa-share-square'>Debug</i></label>
-    <input type="checkbox" id="node-config-input-debugFlag" style="display: inline-block; width: auto; vertical-align: top;">
-  </div>
   <div>
-    <span style="font-weight: bold; margin: 4px 0;"> Get oAuthToken (Experimental)</span>
-    <hr style="font-weight: bold; margin: 10px 0;">
+    <span style="font-weight: bold; margin: 4px 0;" data-i18n="qr.title"></span>
+    <hr style="margin: 10px 0;">
   </div>
-  <div class="form-row">
-    <label for="oauth-username"><i class="fa fa-bookmark"></i> Username</label>
-    <input type="text" id="oauth-username">
-  </div>
-  <div class="form-row">
-    <label for="oauth-password"><i class="fa fa-bookmark"></i> Password</label>
-    <input type="password" id="oauth-password">
-  </div>
-  <div style="text-align-last: center; margin: 4px 0;">
-    <span style="display: none;" id="oauth-status"></span>
-  </div>
-  <div class="form-row" style="display: none;" id="oauth-captcha">
-    <label for="oauth-captcha_answer"><i class="fa fa-bookmark"></i> Captcha</label>
-    <input type="text" id="oauth-captcha_answer">
-    <input type="hidden" id="oauth-captcha_key">
-  </div>
-  <div class="form-row">
-    <span class="button-group" style="float: right; margin-right: 30px;">
-      <button type="button" id="oauth-button" class="red-ui-button toggle status-button-group">Get oAuthToken</button>
-    </span>
+  <div class="form-row" style="text-align: center;">
+    <div id="qr-container" style="display: none; margin: 8px 0;"></div>
+    <div id="qr-status" style="display: none; margin: 8px 0;"></div>
+    <button type="button" id="qr-button" class="red-ui-button toggle" data-i18n="qr.button">
+    </button>
   </div>
 </script>

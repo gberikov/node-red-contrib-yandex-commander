@@ -1,6 +1,6 @@
 import { NodeInitializer } from 'node-red';
-import { StationHelper } from '../../lib/stationHelper';
-import { GetNodeConfig, ConnectNode, NodeStatusData, DeviceState } from '../../lib/types';
+import { StationHelper } from '@/lib/stationHelper';
+import { GetNodeConfig, ConnectNode, NodeStatusData, DeviceState } from '@/lib/types';
 
 const nodeInit: NodeInitializer = (RED) => {
   /**
@@ -13,18 +13,10 @@ const nodeInit: NodeInitializer = (RED) => {
     const node = this;
     node.controller = RED.nodes.getNode(config.token) as ConnectNode | null;
     node.output = config.output;
-    node.debugFlag = config.debugFlag;
     node.stationId = config.station_id;
     node.homekitFormat = config.homekitFormat;
     node.lastState = {};
     node.status({});
-
-    /** Выводит отладочное сообщение в лог */
-    function debugMessage(text: string): void {
-      if (node.debugFlag) {
-        node.log(text);
-      }
-    }
 
     /** Преобразует состояние устройства в payload нужного формата и прикрепляет к входящему сообщению */
     function preparePayload(message: DeviceState, inputMsg: any): any {
@@ -44,7 +36,7 @@ const nodeInit: NodeInitializer = (RED) => {
 
     /** Обработчик входящего сообщения: отдаёт текущее состояние станции или пробрасывает msg */
     node.onInput = function (msg: any, send: any, done: any): void {
-      debugMessage('current state: ' + JSON.stringify(node.lastState));
+      node.debug(`current state: ${JSON.stringify(node.lastState)}`);
       if ('aliceState' in node.lastState) {
         node.send(preparePayload(node.lastState, msg));
       } else {

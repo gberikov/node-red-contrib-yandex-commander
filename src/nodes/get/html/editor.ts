@@ -1,6 +1,34 @@
 declare const RED: any;
 declare const $: any;
 
+function fetchDevices(configNodeId: string, callback: (devices: any[]) => void) {
+  const config = RED.nodes.node(configNodeId);
+  if (!config) return;
+  $.getJSON(`stations/${config.id}`, function (data: any) {
+    if (data.devices && data.devices.length > 0) {
+      callback(data.devices);
+    } else {
+      fetchDevicesByToken(config, callback);
+    }
+  }).fail(function () {
+    fetchDevicesByToken(config, callback);
+  });
+}
+
+function fetchDevicesByToken(config: any, callback: (devices: any[]) => void) {
+  const token = (config.credentials && config.credentials.token) || $('#node-config-input-token').val();
+  if (!token) return;
+  $.ajax({
+    url: 'yandex-commander/devices',
+    method: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify({ token }),
+    success: function (data: any) {
+      if (data.devices) callback(data.devices);
+    }
+  });
+}
+
 RED.nodes.registerType('yandex-commander-get', {
   category: 'Yandex Commander',
   color: '#b89fcc',
@@ -16,9 +44,6 @@ RED.nodes.registerType('yandex-commander-get', {
     output: {
       required: true
     },
-    debugFlag: {
-      value: false
-    },
     homekitFormat: {
       value: 'speaker'
     }
@@ -29,19 +54,25 @@ RED.nodes.registerType('yandex-commander-get', {
   label: function () {
     return this.name || this.station_id;
   },
-  paletteLabel: 'Yandex GET',
+  paletteLabel: 'yandex get',
   /** Инициализация редактора: загружает список устройств и переключает видимость homekit-настроек */
   oneditprepare: function onOpen(this: any) {
-    const config = RED.nodes.node($('#node-input-token').val());
     const selector = $('#node-input-station_id');
-    selector.empty();
     const currentId = this.station_id;
-    $.getJSON('yandexdevices_' + config.id, function (data: any) {
-      data.devices.forEach((device: any) => {
-        selector.append(`<option value="${device.id}">${device.name}(${device.id})</option>`);
-        $(`#node-input-station_id :contains(${currentId})`).attr('selected', 'selected');
+
+    function loadDevices() {
+      selector.empty();
+      fetchDevices($('#node-input-token').val(), function (devices) {
+        devices.forEach((device: any) => {
+          selector.append(`<option value="${device.id}">${device.name} (${device.id})</option>`);
+          $(`#node-input-station_id :contains(${currentId})`).attr('selected', 'selected');
+        });
       });
-    });
+    }
+
+    loadDevices();
+    $('#node-input-token').on('change', loadDevices);
+
     $('#node-input-output').on('change', function () {
       if ($(this).val() == 'homekit') {
         $('#node-homekitFormat').show();

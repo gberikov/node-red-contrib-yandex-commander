@@ -15,4 +15,4 @@ export type {
   WsPayload,
   DeviceState,
   SchedulerDay
-} from '../../lib/types';
+} from '@/lib/types';

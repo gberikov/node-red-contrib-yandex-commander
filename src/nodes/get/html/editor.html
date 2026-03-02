@@ -1,52 +1,65 @@
 <script type="text/html" data-template-name="yandex-commander-get">
   <style>
-      .label-long {min-width: 150px;width: 20%;}
-      .online {display: inline-block; width: auto; vertical-align: middle;}
+      .label-long {
+          min-width: 150px;
+          width: 20%;
+      }
+
+      .online {
+          display: inline-block;
+          width: auto;
+          vertical-align: middle;
+      }
   </style>
 
   <div class="form-row">
-    <label for="node-input-name"><i class="fa fa-bookmark"></i>Name</label>
+    <label for="node-input-name">
+      <i class="fa fa-tag"></i>&nbsp
+      <span data-i18n="label.name"></span>
+    </label>
     <input type="text" id="node-input-name" placeholder="">
   </div>
   <div class="form-row">
-    <label for="node-input-token"><i class="fa fa-globe"></i>Login</label>
-    <input type="text" id="node-input-token" placeholder="Token">
+    <label for="node-input-token">
+      <i class="fa fa-plug"></i>&nbsp
+      <span data-i18n="label.login"></span>
+    </label>
+    <input type="text" id="node-input-token" placeholder="">
   </div>
   <div class="form-row">
-    <label for="node-input-station_id"><i class="fa fa-database">Station</i></label>
+    <label for="node-input-station_id">
+      <i class="fa fa-database"></i>
+      <span data-i18n="label.station"></span>
+    </label>
     <div style="display: inline-block;position: relative;width: 70%;height: 20px;">
-      <div style="position: absolute;left: 0px; right: 40px;">
+      <div style="position: absolute;left: 0; right: 40px;">
         <select id="node-input-station_id" data-single="true" style="width: 100%"></select>
       </div>
       <div style="text-align: end; display: inline; float: right">
-        <button class="red-ui-button" style="position: absolute;right: 0px;top: 0px;"><i class="fa fa-refresh"></i></button>
+        <button class="red-ui-button" style="position: absolute;right: 0;top: 0;"><i class="fa fa-refresh"></i></button>
       </div>
     </div>
   </div>
   <div class="form-row">
-    <label for="node-input-output"><i class="fa fa-arrow-circle-o-left">Output</i></label>
+    <label for="node-input-output"><i class="fa fa-arrow-circle-o-left"></i>&nbsp;<span data-i18n="label.output"></span></label>
     <div style="display: inline-block;position: relative;width: 70%;height: 20px;">
-      <div style="position: absolute;left: 0px; right: 0px;">
+      <div style="position: absolute;left: 0; right: 0;">
         <select id="node-input-output" data-single="true" style="width: 100%">
-          <option value="status">Full status Message</option>
-          <option value="homekit">HomeKit formatted</option>
+          <option value="status" data-i18n="output.status"></option>
+          <option value="homekit" data-i18n="output.homekit"></option>
         </select>
       </div>
     </div>
   </div>
   <div class="form-row" id="node-homekitFormat">
-    <label for="node-input-homekitFormat"><i class="fa fa-arrow-circle-o-left">Homekit Format</i></label>
+    <label for="node-input-homekitFormat"><i class="fa fa-arrow-circle-o-left"></i>&nbsp;<span data-i18n="label.homekit_format"></span></label>
     <div style="display: inline-block;position: relative;width: 70%;height: 20px;">
-      <div style="position: absolute;left: 0px; right: 0px;">
+      <div style="position: absolute;left: 0; right: 0;">
         <select id="node-input-homekitFormat" data-single="true" style="width: 100%">
-          <option value="speaker">Smart Speaker</option>
-          <option value="tv">Television</option>
+          <option value="speaker" data-i18n="homekit.speaker"></option>
+          <option value="tv" data-i18n="homekit.tv"></option>
         </select>
       </div>
     </div>
-  </div>
-  <div class="form-row">
-    <label for='node-input-debugFlag'><i class='fa fa-share-square'>Debug</i></label>
-    <input type="checkbox" id="node-input-debugFlag" checked="checked" style="display: inline-block; width: auto; vertical-align: top;">
   </div>
 </script>

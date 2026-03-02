@@ -1,7 +1,6 @@
 import { EditorNodeProperties, EditorRED } from 'node-red';
 
 interface ConnectEditorNodeProperties extends EditorNodeProperties {
-  debug: boolean;
 }
 
 interface ConnectEditorNodeCredentials {
@@ -14,77 +13,85 @@ RED.nodes.registerType<ConnectEditorNodeProperties, ConnectEditorNodeCredentials
   category: 'config',
   credentials: { token: { type: 'text' } },
   defaults: {
-    name: { value: '' },
-    debugFlag: { value: false }
+    name: { value: '' }
   },
   label: function () {
     return this.name || 'YandexCommanderConnect';
   },
   oneditprepare: function () {
-    const node = this;
-
-    $('#oauth-button').on('click', function () {
-      const username = ($('#oauth-username').val() as string) || '';
-      const password = ($('#oauth-password').val() as string) || '';
-      const captcha_key = ($('#oauth-captcha_key').val() as string) || '';
-      const captcha_answer = ($('#oauth-captcha_answer').val() as string) || '';
-
-      getOAuthToken(username, password, captcha_key, captcha_answer);
-    });
+    $('#qr-button').on('click', startQRAuth);
   }
 });
 
-/**
- * Получает OAuth-токен Яндекса по логину и паролю.
- * Поддерживает CAPTCHA: при необходимости показывает картинку и повторяет запрос с ответом.
- */
-function getOAuthToken(username: string, password: string, captcha_key: string, captcha_answer: string) {
-  const oauthBaseUrl = 'https://oauth.yandex.com';
-  const url = `${oauthBaseUrl}/token`;
-  const clientId = '23cabbbdc6cd418abb4b39c32c41195d';
-  const clientSecret = '53bc75238f0c4d08a118e51fe9203300';
+let activePollInterval: ReturnType<typeof setInterval> | null = null;
+let activePollTimeout: ReturnType<typeof setTimeout> | null = null;
 
-  $('#oauth-status').show();
-  $('#oauth-status').html('Waiting ...').css('color', 'black');
-  $('#oauth-captcha').hide();
-  $('#oauth-captcha_key, #oauth-captcha_answer').val('');
-
-  if (!username || !password) {
-    $('#oauth-status').html('Empty username or password').css('color', 'red');
-    return;
+function cleanupPolling() {
+  if (activePollInterval) {
+    clearInterval(activePollInterval);
+    activePollInterval = null;
   }
-
-  let data: any = {
-    grant_type: 'password',
-    client_id: clientId,
-    client_secret: clientSecret,
-    username: username,
-    password: password
-  };
-
-  if (captcha_key && captcha_answer) {
-    data = { ...data, captcha_key, captcha_answer };
+  if (activePollTimeout) {
+    clearTimeout(activePollTimeout);
+    activePollTimeout = null;
   }
+}
 
-  $.post(url, data)
-    .done(function (res: any) {
-      if (res.access_token) {
-        $('#oauth-status').html('Success').css('color', 'black');
-        $('#node-config-input-token').val(res.access_token);
-        $('#oauth-username, #oauth-password').val('');
+function resetUI() {
+  cleanupPolling();
+  $('#qr-container').hide().empty();
+  $('#qr-button').prop('disabled', false);
+}
+
+async function startQRAuth() {
+  cleanupPolling();
+  $('#qr-button').prop('disabled', true);
+  $('#qr-container').hide().empty();
+  $('#qr-status').show().html(RED._('yandex-commander-connect.qr.initializing')).css('color', 'black');
+
+  try {
+    const res: any = await $.post('/yandex-commander/auth/qr');
+
+    // Display the SVG QR code from Yandex directly
+    $('#qr-container').show().html(res.qrSvg);
+    $('#qr-status').html(RED._('yandex-commander-connect.qr.scan_prompt'));
+
+    // Poll status every 2 seconds
+    activePollInterval = setInterval(async () => {
+      try {
+        const status: any = await $.post('/yandex-commander/auth/qr/status', { sessionId: res.sessionId });
+        if (status.status === 'ok') {
+          cleanupPolling();
+          $('#node-config-input-token').val(status.token);
+          $('#qr-container').hide();
+          $('#qr-status').html(RED._('yandex-commander-connect.qr.token_received')).css('color', 'green');
+          $('#qr-button').prop('disabled', false);
+        }
+      } catch {
+        resetUI();
+        $('#qr-status').html(RED._('yandex-commander-connect.qr.status_error')).css('color', 'red');
       }
-    })
-    .fail(function (res: any) {
-      if (res.responseJSON.error_description.match(/not valid/gi)) {
-        const str = `${res.responseJSON.error_description} (more <a href='https://github.com/AlexxIT/YandexStation/issues/103' target='_blank'>issues/103</a>)`;
-        $('#oauth-status').html(str).css('color', 'red');
-      } else if (res.responseJSON.error_description.match(/CAPTCHA/gi)) {
-        const str = `<img src='${res.responseJSON.x_captcha_url}'>`;
-        $('#oauth-status').html(str);
-        $('#oauth-captcha').show();
-        $('#oauth-captcha_key').val(res.responseJSON.x_captcha_key);
-      } else if (res.responseJSON.error_description) {
-        $('#oauth-status').html(res.responseJSON.error_description).css('color', 'red');
-      }
-    });
+    }, 2000);
+
+    // 5 minute timeout
+    activePollTimeout = setTimeout(() => {
+      resetUI();
+      $('#qr-status').html(RED._('yandex-commander-connect.qr.timeout')).css('color', 'red');
+    }, 300000);
+  } catch (err: any) {
+    const msg = err?.responseJSON?.error || RED._('yandex-commander-connect.qr.unknown_error');
+    const isCaptcha = msg.includes('капчи') || msg.includes('captcha') || msg.includes('Captcha');
+
+    let html = `<span style="color: red;">${msg}</span>`;
+    if (isCaptcha) {
+      html += `<br><br><button type="button" id="qr-retry" class="red-ui-button" style="margin-top: 4px;">${RED._('yandex-commander-connect.qr.retry')}</button>`;
+    }
+
+    $('#qr-status').html(html);
+    $('#qr-button').prop('disabled', false);
+
+    if (isCaptcha) {
+      $('#qr-retry').on('click', startQRAuth);
+    }
+  }
 }

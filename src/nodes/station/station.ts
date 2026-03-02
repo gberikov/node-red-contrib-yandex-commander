@@ -1,5 +1,5 @@
 import { NodeInitializer } from 'node-red';
-import { StationNodeConfig, ConnectNode, NodeStatusData, RuntimeDevice } from '../../lib/types';
+import { StationNodeConfig, ConnectNode, NodeStatusData, RuntimeDevice } from '@/lib/types';
 
 const nodeInit: NodeInitializer = (RED) => {
   /**
@@ -18,19 +18,11 @@ const nodeInit: NodeInitializer = (RED) => {
     node.fixedPort = config.fixedPort;
     node.networkMode = node.network ? node.network.mode || 'auto' : 'auto';
     node.connectionFlag = config.connectionFlag;
-    node.debugFlag = config.debugFlag || true;
     node.status({});
-
-    /** Выводит отладочное сообщение в лог, если включён debugFlag */
-    function debugMessage(text: string): void {
-      if (node.debugFlag) {
-        node.log(text);
-      }
-    }
 
     if (node.sheduler) {
       node.sheduler.forEach((day: any) => {
-        debugMessage(JSON.stringify(day));
+        node.debug(JSON.stringify(day));
       });
     }
 
@@ -50,7 +42,7 @@ const nodeInit: NodeInitializer = (RED) => {
 
     /** Отправляет запрос на регистрацию устройства с параметрами подключения, расписания и сети */
     node.registerDevice = function (): void {
-      debugMessage(`Send registration for ${node.stationId}`);
+      node.debug(`Send registration for ${node.stationId}`);
       const params = {
         connection: node.connectionFlag,
         sheduler: node.sheduler,
