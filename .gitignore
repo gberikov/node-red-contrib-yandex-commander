@@ -28,5 +28,8 @@ Thumbs.db
 *.swo
 *~
 
+# Secrets
+devices.json
+
 # Test & coverage
 coverage/
