@@ -1,0 +1,37 @@
+{
+    "label": {
+        "name": "名称",
+        "login": "登录",
+        "station": "音箱",
+        "ip_address": "IP 地址",
+        "phrase": "要说的短语"
+    },
+    "placeholder": {
+        "phrase": "我已经睡了"
+    },
+    "section": {
+        "connection": "设备连接",
+        "network": "网络",
+        "kid_control": "儿童控制"
+    },
+    "button": {
+        "enabled": "已启用",
+        "disabled": "已禁用",
+        "auto": "自动",
+        "manual": "手动"
+    },
+    "schedule": {
+        "active": "活动",
+        "from": "从",
+        "to": "到"
+    },
+    "day": {
+        "monday": "星期一",
+        "tuesday": "星期二",
+        "wednesday": "星期三",
+        "thursday": "星期四",
+        "friday": "星期五",
+        "saturday": "星期六",
+        "sunday": "星期日"
+    }
+}

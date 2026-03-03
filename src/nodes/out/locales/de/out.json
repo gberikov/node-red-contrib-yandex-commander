@@ -1,0 +1,69 @@
+{
+    "label": {
+        "name": "Name",
+        "text": "Text",
+        "effect": "Effekt",
+        "login": "Anmeldung",
+        "station": "Station",
+        "voice": "Stimme",
+        "debug": "Debug",
+        "command": "Befehl",
+        "volume": "Lautstärke",
+        "prevent_listening": "Nicht auf Antwort warten",
+        "pause_while_tts": "Wiedergabe bei TTS pausieren",
+        "whisper": "Flüstern",
+        "default_command": "Standardbefehl"
+    },
+    "placeholder": {
+        "name": "Name",
+        "play_music": "Musik abspielen"
+    },
+    "command": {
+        "player": "Player",
+        "tts": "Text-to-Speech",
+        "voice": "Sprachbefehl",
+        "raw": "Rohbefehl",
+        "stop_listening": "Nicht mehr zuhören",
+        "homekit": "HomeKit"
+    },
+    "voice": {
+        "default": "Standard",
+        "alena": "Alena",
+        "alyss": "Alyss",
+        "anton_samokhvalov": "Anton Samokhvalov",
+        "dude": "Dude",
+        "ermil": "Ermil",
+        "ermilov": "Ermilov",
+        "ermil_with_tuning": "Ermil (Tuning)",
+        "erkanyavas": "Erkanyavas",
+        "filipp": "Filipp",
+        "jane": "Jane",
+        "kolya": "Kolya",
+        "kostya": "Kostya",
+        "levitan": "Levitan",
+        "nastya": "Nastya",
+        "nick": "Nick",
+        "oksana": "Oksana",
+        "omazh": "Omazh",
+        "robot": "Roboter",
+        "sasha": "Sasha",
+        "silaerkan": "Silaerkan",
+        "smoky": "Smoky",
+        "tanya": "Tanya",
+        "tatyana_abramova": "Tatyana Abramova",
+        "zahar": "Zahar",
+        "zhenya": "Zhenya",
+        "zombie": "Zombie",
+        "voicesearch": "Voicesearch"
+    },
+    "effect": {
+        "none": "Keiner",
+        "behind_the_wall": "Hinter der Wand",
+        "hamster": "Hamster",
+        "megaphone": "Megafon",
+        "pitch_down": "Tiefe Stimme",
+        "psychodelic": "Psychedelisch",
+        "pulse": "Pulsierend",
+        "train_announce": "Lautsprecherdurchsage"
+    }
+}

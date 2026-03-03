@@ -1,0 +1,38 @@
+<script type="text/html" data-template-name="yandex-commander-connect">
+  <style>
+      .label-long {
+          min-width: 150px;
+          width: 20%;
+      }
+
+      .online {
+          display: inline-block;
+          width: auto;
+          vertical-align: middle;
+      }
+  </style>
+  <div class="form-row">
+    <label for="node-config-input-name">
+      <i class="fa fa-tag"></i>
+      <span data-i18n="label.name"></span>
+    </label>
+    <input type="text" id="node-config-input-name">
+  </div>
+  <div class="form-row">
+    <label for="node-config-input-token">
+      <i class="fa fa-key"></i>
+      <span data-i18n="label.token"></span>
+    </label>
+    <input type="text" id="node-config-input-token">
+  </div>
+  <div>
+    <span style="font-weight: bold; margin: 4px 0;" data-i18n="qr.title"></span>
+    <hr style="margin: 10px 0;">
+  </div>
+  <div class="form-row" style="text-align: center;">
+    <div id="qr-container" style="display: none; margin: 8px 0;"></div>
+    <div id="qr-status" style="display: none; margin: 8px 0;"></div>
+    <button type="button" id="qr-button" class="red-ui-button toggle" data-i18n="qr.button">
+    </button>
+  </div>
+</script>

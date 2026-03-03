@@ -1,2 +1,35 @@
+# Dependencies
 node_modules/
-test.js
+
+# Build output
+build/
+dist/
+*.tsbuildinfo
+
+# Runtime & logs
+*.log
+npm-debug.log*
+pids/
+*.pid
+*.seed
+
+# Environment
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Secrets
+devices.json
+
+# Test & coverage
+coverage/

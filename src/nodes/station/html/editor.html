@@ -1,0 +1,130 @@
+<script type="text/html" data-template-name="yandex-commander-station">
+  <style>
+      .label-long {min-width: 150px;width: 20%;}
+      .online {display: inline-block; width: auto; vertical-align: middle;}
+      .thin {margin: 4px 0;}
+  </style>
+
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-bookmark"></i>&nbsp;<span data-i18n="label.name"></span></label>
+    <input type="text" id="node-input-name" placeholder="">
+  </div>
+  <div class="form-row">
+    <label for="node-input-token"><i class="fa fa-globe"></i>&nbsp;<span data-i18n="label.login"></span></label>
+    <input type="text" id="node-input-token" placeholder="token">
+  </div>
+  <div class="form-row">
+    <label for="node-input-station_id"><i class="fa fa-database"></i>&nbsp;<span data-i18n="label.station"></span></label>
+    <div style="display: inline-block;position: relative;width: 70%;height: 20px;">
+      <div style="position: absolute;left: 0; right: 40px;">
+        <select id="node-input-station_id" data-single="true" style="width: 100%"></select>
+      </div>
+      <div style="text-align: end; display: inline; float: right">
+        <button onclick="onRefresh()" class="red-ui-button" style="position: absolute;right: 0;top: 0;"><i class="fa fa-refresh"></i></button>
+      </div>
+    </div>
+  </div>
+  <div>
+    <span style="font-weight: bold; margin: 4px 0;" data-i18n="section.connection"></span>
+    <hr style="font-weight: bold; margin: 10px 0;">
+  </div>
+  <div class="form-row">
+        <span class="button-group">
+            <button type="button" id="buttonEnabled" class="red-ui-button toggle status-button-group" data-i18n="button.enabled"></button><button type="button" id="buttonDisabled" class="red-ui-button toggle status-button-group" data-i18n="button.disabled"></button>
+        </span>
+  </div>
+  <div>
+    <span style="font-weight: bold; margin: 4px 0;" data-i18n="section.network"></span>
+    <hr style="font-weight: bold; margin: 10px 0;">
+  </div>
+  <div class="form-row">
+    <label for="node-input-fixedAddress"><i class="fa fa-globe"></i>&nbsp;<span data-i18n="label.ip_address"></span></label>
+    <span class="button-group">
+            <button type="button" id="autoButton" class="red-ui-button toggle ip-button-group" data-i18n="button.auto"></button><button type="button" id="manualButton" class="red-ui-button toggle ip-button-group" data-i18n="button.manual"></button>
+        </span>
+    <span id="address-block">
+            <input type="text" id="node-input-fixedAddress" placeholder="0.0.0.0" style="width: 120px">
+            <span>:</span>
+            <input type="text" id="node-input-fixedPort" placeholder="1961" style="width: 50px">
+        </span>
+  </div>
+  <div>
+    <span style="font-weight: bold; margin: 4px 0;" data-i18n="section.kid_control"></span>
+    <hr style="font-weight: bold; margin: 10px 0;">
+  </div>
+  <div class="form-row" style="margin-top: 0; font-weight: 500">
+    <label></label>
+    <div style="display: inline-block;position: relative;width: 70%;">
+      <span class="online" style="width:20%; text-align: center;" data-i18n="schedule.active"></span>
+      <span class="online" style="width:38%; text-align: center;" data-i18n="schedule.from"></span>
+      <span class="online" style="width:38%; text-align: center;" data-i18n="schedule.to"></span>
+    </div>
+  </div>
+  <div class="form-row">
+    <label for="node-input-monday"><i class="fa fa-clock-o"></i>&nbsp;<span data-i18n="day.monday"></span></label>
+    <div class="sheduler-block" style="display: inline-block;position: relative;width: 70%;height: 20px;">
+      <input type="checkbox" id="node-input-monday-sheduler" checked="checked" style="display: inline-block; width: 20%;">
+      <select class="time-selector" style="width:37%" id="node-input-monday-start"></select>
+      <span class="online"> - </span>
+      <select class="time-selector" style="width:37%" id="node-input-monday-stop"></select>
+    </div>
+  </div>
+  <div class="form-row">
+    <label for="node-input-tuesday"><i class="fa fa-clock-o"></i>&nbsp;<span data-i18n="day.tuesday"></span></label>
+    <div class="sheduler-block" style="display: inline-block;position: relative;width: 70%;height: 20px;">
+      <input type="checkbox" id="node-input-tuesday-sheduler" checked="checked" style="display: inline-block; width: 20%;">
+      <select class="time-selector" style="width:37%" id="node-input-tuesday-start"></select>
+      <span class="online"> - </span>
+      <select class="time-selector" style="width:37%" id="node-input-tuesday-stop"></select>
+    </div>
+  </div>
+  <div class="form-row">
+    <label for="node-input-wednesday"><i class="fa fa-clock-o"></i>&nbsp;<span data-i18n="day.wednesday"></span></label>
+    <div class="sheduler-block" style="display: inline-block;position: relative;width: 70%;height: 20px;">
+      <input type="checkbox" id="node-input-wednesday-sheduler" checked="checked" style="display: inline-block; width: 20%;">
+      <select class="time-selector" style="width:37%" id="node-input-wednesday-start"></select>
+      <span class="online"> - </span>
+      <select class="time-selector" style="width:37%" id="node-input-wednesday-stop"></select>
+    </div>
+  </div>
+  <div class="form-row">
+    <label for="node-input-thursday"><i class="fa fa-clock-o"></i>&nbsp;<span data-i18n="day.thursday"></span></label>
+    <div class="sheduler-block" style="display: inline-block;position: relative;width: 70%;height: 20px;">
+      <input type="checkbox" id="node-input-thursday-sheduler" checked="checked" style="display: inline-block; width: 20%;">
+      <select class="time-selector" style="width:37%" id="node-input-thursday-start"></select>
+      <span class="online"> - </span>
+      <select class="time-selector" style="width:37%" id="node-input-thursday-stop"></select>
+    </div>
+  </div>
+  <div class="form-row">
+    <label for="node-input-friday"><i class="fa fa-clock-o"></i>&nbsp;<span data-i18n="day.friday"></span></label>
+    <div class="sheduler-block" style="display: inline-block;position: relative;width: 70%;height: 20px;">
+      <input type="checkbox" id="node-input-friday-sheduler" checked="checked" style="display: inline-block; width: 20%;">
+      <select class="time-selector" style="width:37%" id="node-input-friday-start"></select>
+      <span class="online"> - </span>
+      <select class="time-selector" style="width:37%" id="node-input-friday-stop"></select>
+    </div>
+  </div>
+  <div class="form-row">
+    <label for="node-input-saturday"><i class="fa fa-clock-o"></i>&nbsp;<span data-i18n="day.saturday"></span></label>
+    <div class="sheduler-block" style="display: inline-block;position: relative;width: 70%;height: 20px;">
+      <input type="checkbox" id="node-input-saturday-sheduler" checked="checked" style="display: inline-block; width: 20%;">
+      <select class="time-selector" style="width:37%" id="node-input-saturday-start"></select>
+      <span class="online"> - </span>
+      <select class="time-selector" style="width:37%" id="node-input-saturday-stop"></select>
+    </div>
+  </div>
+  <div class="form-row">
+    <label for="node-input-sunday"><i class="fa fa-clock-o"></i>&nbsp;<span data-i18n="day.sunday"></span></label>
+    <div class="sheduler-block" style="display: inline-block;position: relative;width: 70%;height: 20px;">
+      <input type="checkbox" id="node-input-sunday-sheduler" checked="checked" style="display: inline-block; width: 20%;">
+      <select class="time-selector" style="width:37%" id="node-input-sunday-start"></select>
+      <span class="online"> - </span>
+      <select class="time-selector" style="width:37%" id="node-input-sunday-stop"></select>
+    </div>
+  </div>
+  <div class="form-row">
+    <label for="node-input-phrase"><i class="fa fa-comment"></i>&nbsp;<span data-i18n="label.phrase"></span></label>
+    <input type="text" id="node-input-phrase" data-i18n="[placeholder]placeholder.phrase">
+  </div>
+</script>

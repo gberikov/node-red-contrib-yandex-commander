@@ -1,0 +1,37 @@
+{
+    "label": {
+        "name": "Name",
+        "login": "Anmeldung",
+        "station": "Station",
+        "ip_address": "IP-Adresse",
+        "phrase": "Zu sprechender Satz"
+    },
+    "placeholder": {
+        "phrase": "Ich schlafe schon"
+    },
+    "section": {
+        "connection": "Geräteverbindung",
+        "network": "Netzwerk",
+        "kid_control": "Kindersicherung"
+    },
+    "button": {
+        "enabled": "Aktiviert",
+        "disabled": "Deaktiviert",
+        "auto": "Automatisch",
+        "manual": "Manuell"
+    },
+    "schedule": {
+        "active": "Aktiv",
+        "from": "Von",
+        "to": "Bis"
+    },
+    "day": {
+        "monday": "Montag",
+        "tuesday": "Dienstag",
+        "wednesday": "Mittwoch",
+        "thursday": "Donnerstag",
+        "friday": "Freitag",
+        "saturday": "Samstag",
+        "sunday": "Sonntag"
+    }
+}

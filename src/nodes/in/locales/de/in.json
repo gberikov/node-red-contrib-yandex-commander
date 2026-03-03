@@ -1,0 +1,18 @@
+{
+    "label": {
+        "name": "Name",
+        "login": "Anmeldung",
+        "station": "Station",
+        "output": "Ausgabe",
+        "homekit_format": "HomeKit-Format",
+        "unique_messages": "Eindeutige Nachrichten"
+    },
+    "output": {
+        "status": "Vollständige Statusnachricht",
+        "homekit": "HomeKit-formatiert"
+    },
+    "homekit": {
+        "speaker": "Smart-Lautsprecher",
+        "tv": "Fernseher"
+    }
+}

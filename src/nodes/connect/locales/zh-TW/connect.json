@@ -1,0 +1,17 @@
+{
+    "label": {
+        "name": "名稱",
+        "token": "OAuth 權杖"
+    },
+    "qr": {
+        "title": "QR 碼授權",
+        "button": "透過 QR 取得權杖",
+        "initializing": "正在初始化...",
+        "scan_prompt": "使用 Yandex 應用程式或 Yandex Key (ID) 掃描 QR 碼",
+        "token_received": "權杖已取得！",
+        "status_error": "檢查授權狀態時發生錯誤",
+        "timeout": "已逾時，請重試",
+        "unknown_error": "未知錯誤",
+        "retry": "重試"
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "label": {
+        "name": "Название",
+        "login": "Подключение",
+        "station": "Станция",
+        "output": "Выход",
+        "homekit_format": "Формат HomeKit"
+    },
+    "output": {
+        "status": "Полное сообщение статуса",
+        "homekit": "Формат HomeKit"
+    },
+    "homekit": {
+        "speaker": "Умная колонка",
+        "tv": "Телевизор"
+    }
+}

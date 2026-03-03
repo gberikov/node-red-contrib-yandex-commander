@@ -1,0 +1,69 @@
+{
+    "label": {
+        "name": "Nome",
+        "text": "Texto",
+        "effect": "Efeito",
+        "login": "Conexão",
+        "station": "Estação",
+        "voice": "Voz",
+        "debug": "Depuração",
+        "command": "Comando",
+        "volume": "Volume",
+        "prevent_listening": "Não aguardar resposta",
+        "pause_while_tts": "Pausar durante TTS",
+        "whisper": "Sussurro",
+        "default_command": "Comando padrão"
+    },
+    "placeholder": {
+        "name": "Nome",
+        "play_music": "Tocar música"
+    },
+    "command": {
+        "player": "Player",
+        "tts": "Texto para fala",
+        "voice": "Comando de voz",
+        "raw": "Comando bruto",
+        "stop_listening": "Parar de ouvir",
+        "homekit": "HomeKit"
+    },
+    "voice": {
+        "default": "Padrão",
+        "alena": "Alena",
+        "alyss": "Alyss",
+        "anton_samokhvalov": "Anton Samokhvalov",
+        "dude": "Dude",
+        "ermil": "Ermil",
+        "ermilov": "Ermilov",
+        "ermil_with_tuning": "Ermil (afinação)",
+        "erkanyavas": "Erkanyavas",
+        "filipp": "Filipp",
+        "jane": "Jane",
+        "kolya": "Kolya",
+        "kostya": "Kostya",
+        "levitan": "Levitan",
+        "nastya": "Nastya",
+        "nick": "Nick",
+        "oksana": "Oksana",
+        "omazh": "Omazh",
+        "robot": "Robô",
+        "sasha": "Sasha",
+        "silaerkan": "Silaerkan",
+        "smoky": "Smoky",
+        "tanya": "Tanya",
+        "tatyana_abramova": "Tatyana Abramova",
+        "zahar": "Zahar",
+        "zhenya": "Zhenya",
+        "zombie": "Zumbi",
+        "voicesearch": "Voicesearch"
+    },
+    "effect": {
+        "none": "Nenhum",
+        "behind_the_wall": "Atrás da parede",
+        "hamster": "Hamster",
+        "megaphone": "Megafone",
+        "pitch_down": "Voz grave",
+        "psychodelic": "Psicodélico",
+        "pulse": "Pulsante",
+        "train_announce": "Alto-falante de estação"
+    }
+}

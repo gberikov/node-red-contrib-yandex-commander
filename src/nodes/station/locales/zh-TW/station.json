@@ -1,0 +1,37 @@
+{
+    "label": {
+        "name": "名稱",
+        "login": "登入",
+        "station": "音箱",
+        "ip_address": "IP 位址",
+        "phrase": "要說的短語"
+    },
+    "placeholder": {
+        "phrase": "我已經睡了"
+    },
+    "section": {
+        "connection": "裝置連線",
+        "network": "網路",
+        "kid_control": "兒童控制"
+    },
+    "button": {
+        "enabled": "已啟用",
+        "disabled": "已停用",
+        "auto": "自動",
+        "manual": "手動"
+    },
+    "schedule": {
+        "active": "啟用",
+        "from": "從",
+        "to": "到"
+    },
+    "day": {
+        "monday": "星期一",
+        "tuesday": "星期二",
+        "wednesday": "星期三",
+        "thursday": "星期四",
+        "friday": "星期五",
+        "saturday": "星期六",
+        "sunday": "星期日"
+    }
+}

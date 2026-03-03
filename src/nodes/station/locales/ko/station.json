@@ -1,0 +1,37 @@
+{
+    "label": {
+        "name": "이름",
+        "login": "로그인",
+        "station": "스테이션",
+        "ip_address": "IP 주소",
+        "phrase": "말할 문구"
+    },
+    "placeholder": {
+        "phrase": "이미 자고 있어요"
+    },
+    "section": {
+        "connection": "기기 연결",
+        "network": "네트워크",
+        "kid_control": "자녀 보호"
+    },
+    "button": {
+        "enabled": "활성화",
+        "disabled": "비활성화",
+        "auto": "자동",
+        "manual": "수동"
+    },
+    "schedule": {
+        "active": "활성",
+        "from": "시작",
+        "to": "종료"
+    },
+    "day": {
+        "monday": "월요일",
+        "tuesday": "화요일",
+        "wednesday": "수요일",
+        "thursday": "목요일",
+        "friday": "금요일",
+        "saturday": "토요일",
+        "sunday": "일요일"
+    }
+}
