@@ -12,11 +12,14 @@
         "prevent_listening": "Не ждать ответ",
         "pause_while_tts": "Музыку на паузу",
         "whisper": "Шёпотом",
-        "default_command": "Команда"
+        "default_command": "Команда",
+        "music_id": "ID контента",
+        "music_type": "Тип контента"
     },
     "placeholder": {
         "name": "Название",
-        "play_music": "Включи музыку"
+        "play_music": "Включи музыку",
+        "music_id": "id трека / артиста / альбома / плейлиста / радио"
     },
     "command": {
         "player": "Управлять плеером",
@@ -24,7 +27,15 @@
         "voice": "Отработать голосовую команду",
         "stop_listening": "Перестать слушать команды",
         "homekit": "Команда для HomeKit",
+        "play_music": "Включить музыку",
         "raw": "Выполнить RAW-команду"
+    },
+    "music_type": {
+        "track": "Трек",
+        "artist": "Артист",
+        "album": "Альбом",
+        "playlist": "Плейлист",
+        "radio": "Радио"
     },
     "voice": {
         "default": "Алиса (стандартный)",

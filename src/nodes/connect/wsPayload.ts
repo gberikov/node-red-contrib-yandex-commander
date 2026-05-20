@@ -209,6 +209,12 @@ export function buildWsPayload(
       }
       return { payloads: [message.payload as WsPayload] };
 
+    case 'playMusic': {
+      const id = typeof message.id === 'string' ? message.id : '';
+      const type = typeof message.type === 'string' ? message.type : 'track';
+      return { payloads: [{ command: 'playMusic', id, type }] };
+    }
+
     case 'stopListening':
       return {
         payloads: [

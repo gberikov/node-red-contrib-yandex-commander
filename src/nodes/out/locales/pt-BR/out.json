@@ -12,11 +12,14 @@
         "prevent_listening": "Não aguardar resposta",
         "pause_while_tts": "Pausar durante TTS",
         "whisper": "Sussurro",
-        "default_command": "Comando padrão"
+        "default_command": "Comando padrão",
+        "music_id": "ID de música",
+        "music_type": "Tipo de música"
     },
     "placeholder": {
         "name": "Nome",
-        "play_music": "Tocar música"
+        "play_music": "Tocar música",
+        "music_id": "ID faixa / artista / álbum / playlist / rádio"
     },
     "command": {
         "player": "Player",
@@ -24,7 +27,15 @@
         "voice": "Comando de voz",
         "raw": "Comando bruto",
         "stop_listening": "Parar de ouvir",
-        "homekit": "HomeKit"
+        "homekit": "HomeKit",
+        "play_music": "Tocar música"
+    },
+    "music_type": {
+        "track": "Faixa",
+        "artist": "Artista",
+        "album": "Álbum",
+        "playlist": "Playlist",
+        "radio": "Rádio"
     },
     "voice": {
         "default": "Padrão",

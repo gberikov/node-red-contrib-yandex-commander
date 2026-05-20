@@ -41,10 +41,33 @@
           <option value="tts" data-i18n="command.tts"></option>
           <option value="homekit" data-i18n="command.homekit"></option>
           <option value="stopListening" data-i18n="command.stop_listening"></option>
+          <option value="playMusic" data-i18n="command.play_music"></option>
           <option value="raw" data-i18n="command.raw"></option>
         </select>
       </div>
     </div>
+  </div>
+
+  <!--for playMusic-->
+  <div class="form-row command_options command_options-playMusic">
+    <label for="node-input-musicId" class="label-long">
+      <i class="fa fa-music"></i>&nbsp;<span data-i18n="label.music_id"></span>
+      <div class="red-ui-debug-msg-type-string" style="font-size: 10px;">msg.id</div>
+    </label>
+    <input type="text" id="node-input-musicId" data-i18n="[placeholder]placeholder.music_id" style="display: inline-block; width: 60%; vertical-align: middle;">
+  </div>
+  <div class="form-row command_options command_options-playMusic">
+    <label for="node-input-musicType" class="label-long">
+      <i class="fa fa-list"></i>&nbsp;<span data-i18n="label.music_type"></span>
+      <div class="red-ui-debug-msg-type-string" style="font-size: 10px;">msg.type</div>
+    </label>
+    <select id="node-input-musicType" style="width: 60%; vertical-align: middle;">
+      <option value="track" data-i18n="music_type.track"></option>
+      <option value="artist" data-i18n="music_type.artist"></option>
+      <option value="album" data-i18n="music_type.album"></option>
+      <option value="playlist" data-i18n="music_type.playlist"></option>
+      <option value="radio" data-i18n="music_type.radio"></option>
+    </select>
   </div>
 
   <!--for homekit-->

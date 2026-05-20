@@ -124,6 +124,23 @@ describe('buildWsPayload', () => {
     });
   });
 
+  describe('playMusic', () => {
+    it('emits playMusic command for a track id', () => {
+      const result = call('playMusic', { id: '44731403', type: 'track' });
+      expect(result.payloads).toEqual([{ command: 'playMusic', id: '44731403', type: 'track' }]);
+    });
+
+    it('emits playMusic command for a playlist id', () => {
+      const result = call('playMusic', { id: '44731403:1234556', type: 'playlist' });
+      expect(result.payloads).toEqual([{ command: 'playMusic', id: '44731403:1234556', type: 'playlist' }]);
+    });
+
+    it('emits playMusic command for a radio id', () => {
+      const result = call('playMusic', { id: 'detskoe', type: 'radio' });
+      expect(result.payloads).toEqual([{ command: 'playMusic', id: 'detskoe', type: 'radio' }]);
+    });
+  });
+
   describe('stopListening', () => {
     it('emits on_suggest serverAction', () => {
       const result = call('stopListening', {});

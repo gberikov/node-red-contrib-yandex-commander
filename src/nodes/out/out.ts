@@ -14,6 +14,8 @@ interface OutNodeRuntime extends Node<NodeDef> {
   ttsVoice: string;
   ttsEffect: string;
   whisper: boolean;
+  musicId: string;
+  musicType: string;
   onStatus: (data: NodeStatusData) => void;
 }
 
@@ -25,6 +27,8 @@ interface OutInputMessage extends NodeMessageInFlow {
   prevent_listening?: string;
   pause_music?: boolean;
   hap?: { session?: unknown };
+  id?: string;
+  type?: string;
   [key: string]: unknown;
 }
 
@@ -50,6 +54,8 @@ const nodeInit: NodeInitializer = (RED) => {
     this.ttsVoice = config.ttsVoice;
     this.ttsEffect = config.ttsEffect;
     this.whisper = config.whisper;
+    this.musicId = config.musicId;
+    this.musicType = config.musicType;
     this.status({});
 
     this.debug(this.stationId);
@@ -145,6 +151,20 @@ const nodeInit: NodeInitializer = (RED) => {
             );
           } else {
             this.debug('Nothing to send. Check input and parameters');
+          }
+        } else if (this.input === 'playMusic') {
+          // id/type: msg overrides node config; fallback to node config.
+          const id = typeof input.id === 'string' && input.id ? input.id : this.musicId;
+          const type = typeof input.type === 'string' && input.type ? input.type : this.musicType;
+          data.id = id;
+          data.type = type as OutMessage['type'];
+          if (id && this.controller) {
+            this.controller.sendMessage(this.stationId, this.input, data);
+            this.debug(
+              `Sending data: station: ${this.stationId}, input type: ${this.input}, data: ${JSON.stringify(data)}`,
+            );
+          } else {
+            this.debug('playMusic: missing id, nothing to send');
           }
         } else {
           data.payload = input.payload;
