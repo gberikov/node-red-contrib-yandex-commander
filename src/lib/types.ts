@@ -33,7 +33,11 @@ export interface DeviceParameters {
   network?: NetworkConfig;
 }
 
-// ── Runtime Device (extends cloud device with runtime fields) ──
+// ── Runtime Device (cloud device + identity/state) ──
+//
+// Per-device transport (WebSocket, watchdog timers) живёт в GlagolClient.
+// TTS-флаги (waitForListening, playAfterTTS, savedVolumeLevel) живут в TtsStateMachine.
+// schedulerFlag живёт в connect-ноде (Map<deviceId, boolean>).
 
 export interface RuntimeDevice {
   id: string;
@@ -42,23 +46,17 @@ export interface RuntimeDevice {
   address?: string;
   port?: number;
   host?: string;
+  /** Локальный conversation token, полученный через /glagol/token. */
   token?: string;
+  /** Id station-ноды, которая управляет этим устройством. */
   manager?: string;
   parameters: DeviceParameters;
   connection?: boolean;
   mode?: string;
-  ws?: import('ws') | undefined;
-  lastState: Record<string, any>;
+  /** Последнее известное состояние (для get/in нод). */
+  lastState: DeviceState;
+  /** Сериализованный JSON последнего фрейма (для get/in нод). */
   fullMessage?: string;
-  waitForListening?: boolean;
-  playAfterTTS?: boolean;
-  waitForIdle?: boolean;
-  savedVolumeLevel?: number;
-  schedulerFlag?: boolean;
-  watchDog?: ReturnType<typeof setTimeout>;
-  watchDogConn?: ReturnType<typeof setTimeout>;
-  timer?: ReturnType<typeof setTimeout>;
-  pingInterval?: ReturnType<typeof setInterval>;
   glagol?: {
     security: {
       server_certificate: string;
@@ -161,13 +159,13 @@ export interface ConnectCredentials {
 
 export interface ConnectNodeConfig extends NodeDef {}
 
+/**
+ * Публичный интерфейс config-ноды yandex-commander-connect.
+ * Используется другими нодами через RED.nodes.getNode(configId) as ConnectNode.
+ * Внутренние структуры (registry, scheduler, ws-pool) — closure-локалы и сюда не входят.
+ */
 export interface ConnectNode extends Node<ConnectCredentials> {
   token: string;
-  deviceList: RuntimeDevice[];
-  readyList: ReadyDevice[];
-  activeStationList: ActiveStation[];
-  registrationBuffer: RegistrationBufferEntry[];
-  interval?: ReturnType<typeof setInterval>;
   getStatus: (id: string) => NodeStatusData;
   sendMessage: (deviceId: string, messageType: MessageType, message?: OutMessage) => string | undefined;
   registerDevice: (deviceId: string, nodeId: string, parameters: DeviceParameters) => number | undefined;
