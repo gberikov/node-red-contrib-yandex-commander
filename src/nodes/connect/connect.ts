@@ -209,7 +209,17 @@ const nodeInit: NodeInitializer = (RED) => {
       });
 
       device.ws.on('message', function incoming(data: WebSocket.Data) {
-        const dataReceived = JSON.parse(data.toString());
+        let dataReceived: any;
+        try {
+          dataReceived = JSON.parse(data.toString());
+        } catch (err) {
+          node.debug(`${device.id}: Failed to parse incoming WS frame: ${err}`);
+          return;
+        }
+        if (!dataReceived || typeof dataReceived !== 'object' || !dataReceived.state) {
+          node.debug(`${device.id}: WS frame missing state, skipping`);
+          return;
+        }
         device.lastState = dataReceived.state;
         device.fullMessage = JSON.stringify(dataReceived);
         node.emit(`message_${device.id}`, device.lastState);
@@ -265,27 +275,18 @@ const nodeInit: NodeInitializer = (RED) => {
         statusUpdate({ color: 'red', text: 'disconnected' }, device);
         device.lastState = {};
         clearTimeout(device.watchDog!);
-        switch (code) {
-          case 4000:
-            node.debug('Getting new token...');
-            connect(device);
-            break;
-          case 1000:
-            node.debug(`Closed connection code ${code} with reason ${reason}. Reconnecting...`);
-            connect(device);
-            break;
-          case 1006:
-            node.debug(`Lost server, reconnect in 60 seconds...${code} + ${reason}`);
-            device.timer = setTimeout(connect, 60000, device);
-            break;
-          case 10000:
-            node.debug(`Reconnect device reason 10000 ${device.id}`);
-            connect(device);
-            break;
-          default:
-            node.debug(`Closed connection code ${code} with reason ${reason}. Reconnecting in 60 seconds.`);
-            device.timer = setTimeout(connect, 60000, device);
-            break;
+        clearTimeout(device.watchDogConn!);
+        clearInterval(device.pingInterval!);
+        device.pingInterval = undefined;
+        const reasonStr = reason ? reason.toString() : '';
+        // Codes that allow immediate reconnect; everything else backs off 60s.
+        const immediateReconnect = code === 4000 || code === 1000 || code === 10000;
+        if (immediateReconnect) {
+          node.debug(`${device.id}: closed (code ${code}, reason "${reasonStr}"). Reconnecting...`);
+          connect(device);
+        } else {
+          node.debug(`${device.id}: closed (code ${code}, reason "${reasonStr}"). Reconnecting in 60s.`);
+          device.timer = setTimeout(connect, 60000, device);
         }
       });
 
@@ -404,21 +405,23 @@ const nodeInit: NodeInitializer = (RED) => {
           device.parameters = parameters;
           node.debug(`Parameters are: ${JSON.stringify(device.parameters)}`);
           if (device.parameters.network) {
+            const net = device.parameters.network;
             if (device.mode === 'manual') {
               device.address = undefined;
               device.port = undefined;
             }
-            device.mode = device.parameters.network.mode;
-            if (device.parameters.network.fixedAddress.length > 0 && device.parameters.network.mode === 'manual') {
-              device.address = device.parameters.network.fixedAddress;
-            }
-            if (device.parameters.network.fixedPort.length > 0 && device.parameters.network.mode === 'manual') {
-              device.port = parseInt(device.parameters.network.fixedPort);
-            }
-            if (device.parameters.network.mode === 'auto') {
+            device.mode = net.mode;
+            if (net.mode === 'manual') {
+              if (net.fixedAddress && net.fixedAddress.length > 0) {
+                device.address = net.fixedAddress;
+              }
+              if (net.fixedPort && net.fixedPort.length > 0) {
+                device.port = parseInt(net.fixedPort, 10);
+              }
+            } else if (net.mode === 'auto') {
               removeDevice(node.readyList, device);
             }
-            node.debug(`Network parameters: ${JSON.stringify(device.parameters.network)}`);
+            node.debug(`Network parameters: ${JSON.stringify(net)}`);
           }
           device.connection = device.parameters.connection !== false;
 
@@ -451,9 +454,9 @@ const nodeInit: NodeInitializer = (RED) => {
       const device = findDeviceById(deviceId);
       if (device) {
         if (device.manager === nodeId) {
+          node.debug(`For device ${deviceId} was successfully unregistered management node with id ${device.manager}`);
           device.manager = undefined;
           device.parameters = {};
-          node.debug(`For device ${deviceId} was successfully unregistered management node with id ${device.manager}`);
           return 0;
         } else {
           return 2;
@@ -464,7 +467,25 @@ const nodeInit: NodeInitializer = (RED) => {
 
     function onClose(): void {
       clearInterval(node.interval!);
+      for (const device of node.deviceList) {
+        clearTimeout(device.watchDog!);
+        clearTimeout(device.watchDogConn!);
+        clearTimeout(device.timer!);
+        clearInterval(device.pingInterval!);
+        if (device.ws) {
+          // Remove listeners so the close handler doesn't trigger a reconnect.
+          device.ws.removeAllListeners();
+          try {
+            device.ws.terminate();
+          } catch (err) {
+            node.debug(`${device.id}: error terminating ws on close: ${err}`);
+          }
+          device.ws = undefined;
+        }
+      }
       node.deviceList = [];
+      node.readyList = [];
+      node.activeStationList = [];
     }
 
     node.on('close', onClose);

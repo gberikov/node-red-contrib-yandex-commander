@@ -1,5 +1,5 @@
 import { NodeInitializer } from 'node-red';
-import { StationHelper } from '@/lib/stationHelper';
+import { preparePayload as buildPayload } from '@/lib/stationHelper';
 import { GetNodeConfig, ConnectNode, NodeStatusData, DeviceState } from '@/lib/types';
 
 const nodeInit: NodeInitializer = (RED) => {
@@ -20,7 +20,7 @@ const nodeInit: NodeInitializer = (RED) => {
 
     /** Преобразует состояние устройства в payload нужного формата и прикрепляет к входящему сообщению */
     function preparePayload(message: DeviceState, inputMsg: any): any {
-      const prepared = StationHelper.preparePayload(node, message);
+      const prepared = buildPayload(node, message);
       if (typeof prepared.payload !== 'undefined') {
         inputMsg.payload = prepared.payload;
       }
@@ -53,6 +53,7 @@ const nodeInit: NodeInitializer = (RED) => {
     node.onClose = function (): void {
       if (node.controller) {
         node.controller.removeListener(`message_${node.stationId}`, node.onMessage);
+        node.controller.removeListener(`statusUpdate_${node.stationId}`, node.onStatus);
       }
     };
 

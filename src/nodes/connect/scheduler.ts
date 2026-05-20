@@ -7,11 +7,11 @@ import { DeviceParameters, SchedulerDay } from '@/lib/types';
 export function checkScheduler(parameters: DeviceParameters, timestamp: number): [true] | [false, string] {
   const schedule: SchedulerDay[] = parameters.sheduler || [];
   const date = new Date(timestamp);
-  const currentMinutes = date.getDay() * 1000 + date.getHours() * 60 + date.getMinutes();
   const daySchedule = schedule.find((el) => el.dayNumber === date.getDay());
   if (!daySchedule) return [true];
-  const timeMin = daySchedule.dayNumber * 1000 + parseInt(daySchedule.from);
-  const timeMax = daySchedule.dayNumber * 1000 + parseInt(daySchedule.to);
+  const currentMinutes = date.getHours() * 60 + date.getMinutes();
+  const timeMin = parseInt(daySchedule.from, 10);
+  const timeMax = parseInt(daySchedule.to, 10);
   if (currentMinutes >= timeMin && currentMinutes < timeMax) {
     return [true];
   }

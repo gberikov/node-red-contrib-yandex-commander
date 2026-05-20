@@ -250,17 +250,9 @@ function onSave(this: any) {
   });
   this.sheduler = sheduler;
 
-  const network: any = {};
-  if ($('#autoButton').hasClass('selected')) {
-    network.mode = 'auto';
-    network.address = '0.0.0.0';
-    network.port = 1961;
-  } else {
-    network.mode = 'manual';
-    network.address = $('#node-input-fixedAddress').val();
-    network.port = $('#node-input-fixedPort').val();
-  }
-  this.network = network;
+  // Network mode is consumed by the runtime via the top-level `fixedAddress`/`fixedPort`
+  // fields (see station.ts:49). The `network` config holds only the mode flag.
+  this.network = { mode: $('#autoButton').hasClass('selected') ? 'auto' : 'manual' };
 
   if ($('#buttonEnabled').hasClass('selected')) {
     this.connectionFlag = true;

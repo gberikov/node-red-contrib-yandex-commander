@@ -90,8 +90,9 @@ const nodeInit: NodeInitializer = (RED) => {
             }
           }
 
-          if (typeof payload !== 'undefined') {
-            data.payload = payload;
+          if (typeof payload !== 'undefined' && payload !== null) {
+            // Coerce non-string payloads (numbers, objects) to string so SSML wrapping is safe.
+            data.payload = typeof payload === 'string' ? payload : String(payload);
             if (node.ttsVoice) {
               data.payload = `<speaker voice='${node.ttsVoice}'>${data.payload}`;
             }
@@ -102,7 +103,7 @@ const nodeInit: NodeInitializer = (RED) => {
               }
             }
             if (data.whisper) {
-              data.payload = `<speaker is_whisper='${data.whisper}'>${data.payload}`;
+              data.payload = `<speaker is_whisper='true'>${data.payload}`;
             }
           } else {
             data.payload = '';
