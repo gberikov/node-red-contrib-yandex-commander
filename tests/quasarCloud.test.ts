@@ -180,3 +180,93 @@ describe('QuasarCloud.sendCloudTts', () => {
     expect(stub.calls).toHaveLength(0);
   });
 });
+
+describe('QuasarCloud.sendCloudTts caching and retry', () => {
+  let stub: ReturnType<typeof makeAxiosStub>;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    stub = makeAxiosStub();
+    vi.mocked(axios.create).mockReturnValue(stub.instance as unknown as ReturnType<typeof axios.create>);
+  });
+
+  it('caches the scenario id across calls for the same device', async () => {
+    // First call: 5 requests as in happy path.
+    stub.responses.push({ data: { status: 'ok', token: 'csrf-1' } });
+    stub.responses.push({ data: { scenarios: [] } });
+    stub.responses.push({ data: { scenario_id: 'sc-1' } });
+    stub.responses.push({ data: { status: 'ok' } });
+    stub.responses.push({ data: { status: 'ok' } });
+    // Second call: only PUT + POST (csrf cached, scenario cached).
+    stub.responses.push({ data: { status: 'ok' } });
+    stub.responses.push({ data: { status: 'ok' } });
+
+    const cloud = new QuasarCloud('oauth-token', () => {});
+    await cloud.sendCloudTts('abc123', 'Один');
+    await cloud.sendCloudTts('abc123', 'Два');
+
+    expect(stub.calls).toHaveLength(7);
+    expect(stub.calls[5].method).toBe('PUT');
+    expect(stub.calls[5].url).toBe('/m/v3/user/scenarios/sc-1');
+    expect(stub.calls[6].method).toBe('POST');
+    expect(stub.calls[6].url).toBe('/m/v3/user/scenarios/sc-1/actions');
+  });
+
+  it('adopts an existing scenario whose name matches the encoded device id', async () => {
+    stub.responses.push({ data: { status: 'ok', token: 'csrf-1' } });
+    stub.responses.push({
+      data: {
+        scenarios: [
+          { id: 'other-1', name: 'unrelated' },
+          { id: 'adopted-1', name: encodeDeviceId('abc123') },
+        ],
+      },
+    });
+    // No POST create — straight to PUT + POST actions.
+    stub.responses.push({ data: { status: 'ok' } });
+    stub.responses.push({ data: { status: 'ok' } });
+
+    const cloud = new QuasarCloud('oauth-token', () => {});
+    await cloud.sendCloudTts('abc123', 'Привет');
+
+    expect(stub.calls).toHaveLength(4);
+    expect(stub.calls[2].method).toBe('PUT');
+    expect(stub.calls[2].url).toBe('/m/v3/user/scenarios/adopted-1');
+    expect(stub.calls[3].url).toBe('/m/v3/user/scenarios/adopted-1/actions');
+  });
+
+  it('refetches CSRF and retries once on 403 from PUT', async () => {
+    stub.responses.push({ data: { status: 'ok', token: 'csrf-stale' } });
+    stub.responses.push({ data: { scenarios: [] } });
+    stub.responses.push({ data: { scenario_id: 'sc-1' } });
+    // PUT 403 → refetch /csrf_token → retry PUT 200.
+    stub.responses.push({ status: 403, data: { error: 'csrf' } });
+    stub.responses.push({ data: { status: 'ok', token: 'csrf-fresh' } });
+    stub.responses.push({ data: { status: 'ok' } });
+    stub.responses.push({ data: { status: 'ok' } });
+
+    const cloud = new QuasarCloud('oauth-token', () => {});
+    await cloud.sendCloudTts('abc123', 'Привет');
+
+    expect(stub.calls).toHaveLength(7);
+    expect(stub.calls[3].method).toBe('PUT');
+    expect(stub.calls[3].headers?.['x-csrf-token']).toBe('csrf-stale');
+    expect(stub.calls[4].method).toBe('GET');
+    expect(stub.calls[4].url).toBe('/csrf_token');
+    expect(stub.calls[5].method).toBe('PUT');
+    expect(stub.calls[5].headers?.['x-csrf-token']).toBe('csrf-fresh');
+  });
+
+  it('does not retry more than once on persistent 403', async () => {
+    stub.responses.push({ data: { status: 'ok', token: 'csrf-stale' } });
+    stub.responses.push({ data: { scenarios: [] } });
+    stub.responses.push({ data: { scenario_id: 'sc-1' } });
+    stub.responses.push({ status: 403, data: { error: 'csrf' } }); // PUT #1
+    stub.responses.push({ data: { status: 'ok', token: 'csrf-fresh' } }); // refetch
+    stub.responses.push({ status: 403, data: { error: 'csrf' } }); // PUT retry — also fails
+
+    const cloud = new QuasarCloud('oauth-token', () => {});
+    await expect(cloud.sendCloudTts('abc123', 'Привет')).rejects.toThrow(/HTTP 403/);
+    expect(stub.calls).toHaveLength(6);
+  });
+});
