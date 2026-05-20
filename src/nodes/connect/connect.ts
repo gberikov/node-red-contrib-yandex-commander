@@ -3,6 +3,7 @@ import type { NodeInitializer } from 'node-red';
 import { QuasarApi } from '@/lib/api';
 import type { Device } from '@/lib/api/device';
 import { YandexAuth } from '@/lib/auth';
+import { QuasarCloud } from '@/lib/quasarCloud';
 import type {
   ConnectNode,
   ConnectNodeConfig,
@@ -15,7 +16,6 @@ import type {
   RuntimeDevice,
   WsPayload,
 } from '@/lib/types';
-import { QuasarCloud } from '@/lib/quasarCloud';
 import { nextBackoffMs } from './backoff';
 import { decideCloudRoute } from './cloudRoute';
 import { applyCloudFallback, discoverDevices } from './discovery';
