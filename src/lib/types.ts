@@ -105,7 +105,7 @@ export type MessageType = 'command' | 'voice' | 'tts' | 'homekit' | 'raw' | 'sto
 
 export interface WsPayload {
   command: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface WsMessage {
@@ -135,19 +135,24 @@ export interface DeviceState {
   playing?: boolean;
   volume?: number;
   playerState?: PlayerState;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // ── TTS / Command Message ──
+//
+// `payload` хранит произвольные пользовательские данные: строку команды/фразы,
+// объект homekit или массив RAW-команд. Сужение делается в buildWsPayload через
+// runtime-проверки (typeof / Array.isArray / 'X' in payload).
+// `hap.session` приходит из HomeKit-моста и не имеет фиксированной формы.
 
 export interface OutMessage {
-  payload: any;
+  payload: unknown;
   volume?: number;
   whisper?: boolean;
   stopListening?: boolean;
   noTrackPhrase?: string;
   pauseMusic?: boolean;
-  hap?: { session?: any };
+  hap?: { session?: unknown };
   level?: string;
 }
 

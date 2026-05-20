@@ -5,19 +5,23 @@ declare module 'node-dns-sd' {
     quick?: boolean;
   }
 
+  /** Сырая структура rdata для разных типов DNS-записей. Для SRV содержит target,
+   *  для TXT — произвольный набор key=value пар. */
+  type DnsRdata = { target?: string; [key: string]: unknown };
+
   interface DnsRecord {
     type: string;
-    rdata: any;
+    rdata: DnsRdata;
   }
 
   interface DiscoverResult {
     address: string;
-    service: { port: number; [key: string]: any };
+    service: { port: number; [key: string]: unknown };
     packet: {
       answers: DnsRecord[];
       additionals: DnsRecord[];
     };
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   interface MDnsSd {

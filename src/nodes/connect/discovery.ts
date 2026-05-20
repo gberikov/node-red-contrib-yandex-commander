@@ -3,11 +3,16 @@ import type { RuntimeDevice } from '@/lib/types';
 
 type DebugFn = (msg: string) => void;
 
+type DnsRecordLike = { type: string; rdata: { target?: string; [key: string]: unknown } };
+
 /**
  * Ищет устройства в локальной сети через mDNS (_yandexio._tcp) и обновляет их адреса/порты.
  * Мутирует device.address / device.port / device.host в массиве.
  */
-export async function discoverDevices(deviceList: RuntimeDevice[], debug: DebugFn): Promise<any[]> {
+export async function discoverDevices(
+  deviceList: RuntimeDevice[],
+  debug: DebugFn,
+): Promise<Awaited<ReturnType<typeof mDnsSd.discover>>> {
   const result = await mDnsSd.discover({ name: '_yandexio._tcp.local' });
   if (result.length === 0) return result;
 
@@ -17,11 +22,11 @@ export async function discoverDevices(deviceList: RuntimeDevice[], debug: DebugF
 
     for (const element of result) {
       const srvRecord =
-        element.packet.answers.find((el: any) => el.type === 'SRV') ||
-        element.packet.additionals.find((el: any) => el.type === 'SRV');
+        element.packet.answers.find((el: DnsRecordLike) => el.type === 'SRV') ||
+        element.packet.additionals.find((el: DnsRecordLike) => el.type === 'SRV');
       const txtRecord =
-        element.packet.answers.find((el: any) => el.type === 'TXT') ||
-        element.packet.additionals.find((el: any) => el.type === 'TXT');
+        element.packet.answers.find((el: DnsRecordLike) => el.type === 'TXT') ||
+        element.packet.additionals.find((el: DnsRecordLike) => el.type === 'TXT');
       if (txtRecord && txtRecord.rdata.deviceId === device.id) {
         device.address = element.address;
         device.port = element.service.port;
