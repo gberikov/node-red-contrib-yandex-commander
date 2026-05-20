@@ -46,14 +46,14 @@ export function preparePayload(node: StationNode, message: DeviceState): Prepare
       return {
         payload: {
           CurrentMediaState: playing ? 0 : 1,
-          configuredName: configuredName
-        }
+          configuredName: configuredName,
+        },
       };
     } else if (node.homekitFormat === 'tv') {
       return {
         payload: {
-          Active: playing ? 1 : 0
-        }
+          Active: playing ? 1 : 0,
+        },
       };
     }
   }

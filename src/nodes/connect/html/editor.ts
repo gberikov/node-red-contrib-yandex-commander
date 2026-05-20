@@ -12,14 +12,14 @@ RED.nodes.registerType<ConnectEditorNodeProperties, ConnectEditorNodeCredentials
   category: 'config',
   credentials: { token: { type: 'text' } },
   defaults: {
-    name: { value: '' }
+    name: { value: '' },
   },
   label: function () {
     return this.name || 'YandexCommanderConnect';
   },
   oneditprepare: () => {
     $('#qr-button').on('click', startQRAuth);
-  }
+  },
 });
 
 let activePollInterval: ReturnType<typeof setInterval> | null = null;

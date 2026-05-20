@@ -46,7 +46,7 @@ const nodeInit: NodeInitializer = (RED) => {
       const params = {
         connection: this.connectionFlag,
         sheduler: this.sheduler,
-        network: { mode: this.networkMode, fixedAddress: this.fixedAddress, fixedPort: this.fixedPort }
+        network: { mode: this.networkMode, fixedAddress: this.fixedAddress, fixedPort: this.fixedPort },
       };
       const status = this.controller.registerDevice(this.stationId, this.id, params);
       this.registration = status !== 2 && status !== undefined;

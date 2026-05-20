@@ -25,7 +25,7 @@ function fetchDevicesByToken(config: any, callback: (devices: any[]) => void) {
     data: JSON.stringify({ token }),
     success: (data: any) => {
       if (data.devices) callback(data.devices);
-    }
+    },
   });
 }
 
@@ -36,20 +36,20 @@ RED.nodes.registerType('yandex-commander-in', {
     name: { value: '' },
     token: {
       type: 'yandex-commander-connect',
-      required: true
+      required: true,
     },
     station_id: {
-      required: true
+      required: true,
     },
     uniqueFlag: {
-      value: false
+      value: false,
     },
     output: {
-      required: true
+      required: true,
     },
     homekitFormat: {
-      value: 'speaker'
-    }
+      value: 'speaker',
+    },
   },
   inputs: 0,
   outputs: 1,
@@ -58,7 +58,7 @@ RED.nodes.registerType('yandex-commander-in', {
     return this.name || this.station_id;
   },
   paletteLabel: 'yandex in',
-  oneditprepare: onOpen
+  oneditprepare: onOpen,
 });
 
 /** Инициализация редактора: загружает список устройств и управляет видимостью homekit/unique-настроек */

@@ -14,5 +14,5 @@ export type {
   RegistrationBufferEntry,
   RuntimeDevice,
   SchedulerDay,
-  WsPayload
+  WsPayload,
 } from '@/lib/types';

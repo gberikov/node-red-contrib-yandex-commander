@@ -25,7 +25,7 @@ function fetchDevicesByToken(config: any, callback: (devices: any[]) => void) {
     data: JSON.stringify({ token }),
     success: (data: any) => {
       if (data.devices) callback(data.devices);
-    }
+    },
   });
 }
 
@@ -36,42 +36,42 @@ RED.nodes.registerType('yandex-commander-out', {
     name: { value: '' },
     token: {
       type: 'yandex-commander-connect',
-      required: true
+      required: true,
     },
     station_id: {
-      required: true
+      required: true,
     },
     input: {
       value: 'command',
-      required: true
+      required: true,
     },
     payload: {
-      value: 'payload'
+      value: 'payload',
     },
     payloadType: {
-      value: 'msg'
+      value: 'msg',
     },
     volume: {},
     volumeFlag: {
-      value: false
+      value: false,
     },
     stopListening: {
-      value: true
+      value: true,
     },
     pauseMusic: {
-      value: false
+      value: false,
     },
     noTrack: {},
     whisper: {
-      value: false
+      value: false,
     },
     ttsVoice: {
-      value: null
+      value: null,
     },
     ttsEffect: {
       value: null,
-      required: false
-    }
+      required: false,
+    },
   },
   inputs: 1,
   outputs: 0,
@@ -80,7 +80,7 @@ RED.nodes.registerType('yandex-commander-out', {
     return this.name || this.station_id;
   },
   paletteLabel: 'yandex out',
-  oneditprepare: onOpen
+  oneditprepare: onOpen,
 });
 
 /** Инициализация редактора: настраивает typedInput для payload/effect, загружает устройства, управляет видимостью секций */
@@ -91,7 +91,7 @@ function onOpen(this: any) {
     types: ['msg', 'str', 'flow', 'global', 'json'],
     default: 'msg',
     value: 'payload',
-    typeField: $('#node-input-payloadType')
+    typeField: $('#node-input-payloadType'),
   });
 
   $('#node-input-ttsEffect').typedInput({
@@ -102,16 +102,31 @@ function onOpen(this: any) {
         multiple: false,
         options: [
           { value: '', label: RED._('node-red-contrib-yandex-commander/yandex-commander-out:effect.none') },
-          { value: 'behind_the_wall', label: RED._('node-red-contrib-yandex-commander/yandex-commander-out:effect.behind_the_wall') },
+          {
+            value: 'behind_the_wall',
+            label: RED._('node-red-contrib-yandex-commander/yandex-commander-out:effect.behind_the_wall'),
+          },
           { value: 'hamster', label: RED._('node-red-contrib-yandex-commander/yandex-commander-out:effect.hamster') },
-          { value: 'megaphone', label: RED._('node-red-contrib-yandex-commander/yandex-commander-out:effect.megaphone') },
-          { value: 'pitch_down', label: RED._('node-red-contrib-yandex-commander/yandex-commander-out:effect.pitch_down') },
-          { value: 'psychodelic', label: RED._('node-red-contrib-yandex-commander/yandex-commander-out:effect.psychodelic') },
+          {
+            value: 'megaphone',
+            label: RED._('node-red-contrib-yandex-commander/yandex-commander-out:effect.megaphone'),
+          },
+          {
+            value: 'pitch_down',
+            label: RED._('node-red-contrib-yandex-commander/yandex-commander-out:effect.pitch_down'),
+          },
+          {
+            value: 'psychodelic',
+            label: RED._('node-red-contrib-yandex-commander/yandex-commander-out:effect.psychodelic'),
+          },
           { value: 'pulse', label: RED._('node-red-contrib-yandex-commander/yandex-commander-out:effect.pulse') },
-          { value: 'train_announce', label: RED._('node-red-contrib-yandex-commander/yandex-commander-out:effect.train_announce') }
-        ]
-      }
-    ]
+          {
+            value: 'train_announce',
+            label: RED._('node-red-contrib-yandex-commander/yandex-commander-out:effect.train_announce'),
+          },
+        ],
+      },
+    ],
   });
 
   const selector = $('#node-input-station_id');

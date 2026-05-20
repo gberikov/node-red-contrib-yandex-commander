@@ -2,23 +2,24 @@
   "compilerOptions": {
     "outDir": "./build",
     "rootDir": "./src",
-    "target": "ES2021",
+    "target": "ES2022",
     "module": "CommonJS",
-    "lib": ["ES2021"],
-    "moduleResolution": "node10",
+    "lib": ["ES2022"],
+    "moduleResolution": "Node10",
+    "ignoreDeprecations": "6.0",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "strict": false,
+    "isolatedModules": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
     "noFallthroughCasesInSwitch": true,
     "preserveConstEnums": true,
     "preserveWatchOutput": true,
-    "typeRoots": ["./node_modules/@types"],
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src/**/*"],

@@ -111,7 +111,9 @@ const nodeInit: NodeInitializer = (RED) => {
 
           if (data.payload.length > 0) {
             this.controller.sendMessage(this.stationId, this.input, data);
-            this.debug(`Sending data: station: ${this.stationId}, input type: ${this.input}, data: ${JSON.stringify(data)}`);
+            this.debug(
+              `Sending data: station: ${this.stationId}, input type: ${this.input}, data: ${JSON.stringify(data)}`,
+            );
           } else {
             this.debug('Nothing to send. Check input and parameters');
           }
@@ -119,7 +121,9 @@ const nodeInit: NodeInitializer = (RED) => {
           data.payload = input.payload;
           data.hap = input.hap;
           this.controller.sendMessage(this.stationId, this.input, data);
-          this.debug(`Sending data: station: ${this.stationId}, input type: ${this.input}, data: ${JSON.stringify(data)}`);
+          this.debug(
+            `Sending data: station: ${this.stationId}, input type: ${this.input}, data: ${JSON.stringify(data)}`,
+          );
         }
       } else {
         this.debug('node.stationId is empty');

@@ -8,19 +8,19 @@ RED.nodes.registerType('yandex-commander-station', {
     name: { value: '' },
     token: {
       type: 'yandex-commander-connect',
-      required: true
+      required: true,
     },
     station_id: {
-      required: true
+      required: true,
     },
     connectionFlag: {
-      value: true
+      value: true,
     },
     sheduler: {
-      value: []
+      value: [],
     },
     network: {
-      value: {}
+      value: {},
     },
     fixedAddress: {
       validate: function (this: any, address: string) {
@@ -29,9 +29,11 @@ RED.nodes.registerType('yandex-commander-station', {
         } else if (this.network.mode === 'auto') {
           return true;
         } else if (this.network.mode === 'manual') {
-          return !!address.match(/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/);
+          return !!address.match(
+            /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,
+          );
         }
-      }
+      },
     },
     fixedPort: {
       validate: function (this: any, port: string) {
@@ -42,11 +44,11 @@ RED.nodes.registerType('yandex-commander-station', {
         } else if (this.network.mode === 'manual') {
           return !!Number(port);
         }
-      }
+      },
     },
     phrase: {
-      value: ''
-    }
+      value: '',
+    },
   },
   inputs: 0,
   outputs: 0,
@@ -56,7 +58,7 @@ RED.nodes.registerType('yandex-commander-station', {
   },
   paletteLabel: 'Station',
   oneditprepare: onOpen,
-  oneditsave: onSave
+  oneditsave: onSave,
 });
 
 /** Получает список устройств: сначала пробует per-node endpoint, при неудаче — статический POST */
@@ -84,7 +86,7 @@ function fetchDevicesByToken(config: any, callback: (devices: any[]) => void) {
     data: JSON.stringify({ token }),
     success: (data: any) => {
       if (data.devices) callback(data.devices);
-    }
+    },
   });
 }
 
@@ -124,8 +126,12 @@ function onOpen(this: any) {
       devices.forEach((device: any) => {
         selector.append(`<option value="${device.id}">${device.name} (${device.id})</option>`);
         $(`#node-input-station_id :contains(${currentId})`).attr('selected', true);
-        currentId === device.id && device.address ? $('#node-input-fixedAddress').attr('placeholder', device.address) : $('#node-input-fixedAddress').attr('placeholder', '0.0.0.0');
-        currentId === device.id && device.port ? $('#node-input-fixedPort').attr('placeholder', device.port) : $('#node-input-fixedPort').attr('placeholder', '1961');
+        currentId === device.id && device.address
+          ? $('#node-input-fixedAddress').attr('placeholder', device.address)
+          : $('#node-input-fixedAddress').attr('placeholder', '0.0.0.0');
+        currentId === device.id && device.port
+          ? $('#node-input-fixedPort').attr('placeholder', device.port)
+          : $('#node-input-fixedPort').attr('placeholder', '1961');
       });
     });
   }
@@ -159,7 +165,8 @@ function onOpen(this: any) {
   const sheduler = this.sheduler || [];
 
   $('.sheduler-block').each(function (this: any, i: number, block: any) {
-    const currentDaySchedule = i === 6 ? sheduler.find((el: any) => el.dayNumber === 0) : sheduler.find((el: any) => el.dayNumber === i + 1);
+    const currentDaySchedule =
+      i === 6 ? sheduler.find((el: any) => el.dayNumber === 0) : sheduler.find((el: any) => el.dayNumber === i + 1);
     const activeFlag = !currentDaySchedule ? true : currentDaySchedule.active;
     const startTime = !currentDaySchedule ? '0' : currentDaySchedule.from;
     const endTime = !currentDaySchedule ? '1440' : currentDaySchedule.to;
