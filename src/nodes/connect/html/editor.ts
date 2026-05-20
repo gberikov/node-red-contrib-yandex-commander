@@ -95,7 +95,8 @@ async function startQRAuth() {
     }, 300000);
   } catch (err) {
     const msg =
-      (err as JQueryErrorPayload | undefined)?.responseJSON?.error ?? RED._('yandex-commander-connect.qr.unknown_error');
+      (err as JQueryErrorPayload | undefined)?.responseJSON?.error ??
+      RED._('yandex-commander-connect.qr.unknown_error');
     const isCaptcha = msg.includes('капчи') || msg.includes('captcha') || msg.includes('Captcha');
 
     let html = `<span style="color: red;">${msg}</span>`;

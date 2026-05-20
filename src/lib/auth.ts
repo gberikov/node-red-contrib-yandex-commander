@@ -142,7 +142,7 @@ export class YandexAuth {
       amHtml.match(/name="csrf_token"[^>]*value="([^"]+)"/) ||
       amHtml.match(/value="([^"]+)"[^>]*name="csrf_token"/) ||
       amHtml.match(/"csrf_token"\s*:\s*"([^"]+)"/);
-    if (!csrfMatch || !csrfMatch[1]) {
+    if (!csrfMatch?.[1]) {
       throw new Error('Failed to parse csrf_token from auth page');
     }
     const csrfToken = csrfMatch[1];
@@ -203,7 +203,7 @@ export class YandexAuth {
     cookies = mergeCookies(cookies, qrPageResponse.headers['set-cookie']);
     const qrSvg: string = qrPageResponse.data;
 
-    if (!qrSvg || !qrSvg.includes('<svg')) {
+    if (!qrSvg?.includes('<svg')) {
       throw new Error('Failed to fetch QR code SVG from Yandex');
     }
 

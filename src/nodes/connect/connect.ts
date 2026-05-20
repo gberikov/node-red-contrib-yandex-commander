@@ -83,7 +83,7 @@ const nodeInit: NodeInitializer = (RED) => {
       const device = registry.get(deviceId);
       if (!device) return undefined;
       const client = glagolClients.get(deviceId);
-      if (!client || !client.isOpen()) return 'Device offline';
+      if (!client?.isOpen()) return 'Device offline';
 
       try {
         const result = buildWsPayload(
@@ -212,7 +212,7 @@ const nodeInit: NodeInitializer = (RED) => {
         return;
       }
       const existing = glagolClients.get(device.id);
-      if (existing && existing.isOpen()) return;
+      if (existing?.isOpen()) return;
 
       statusUpdate(device.id, { color: 'yellow', text: 'connecting...' });
 
@@ -287,7 +287,7 @@ const nodeInit: NodeInitializer = (RED) => {
 
     function dispatchTtsAction(deviceId: string, action: { type: string; volume?: number }): void {
       const client = glagolClients.get(deviceId);
-      if (!client || !client.isOpen()) return;
+      if (!client?.isOpen()) return;
       if (action.type === 'stopListening') {
         sendMessage.call(node, deviceId, 'stopListening');
       } else if (action.type === 'play') {
@@ -362,7 +362,7 @@ const nodeInit: NodeInitializer = (RED) => {
       for (const device of registry.all()) {
         if (!device.address || !device.port) continue;
         const client = glagolClients.get(device.id);
-        if (client && client.isOpen()) continue;
+        if (client?.isOpen()) continue;
         if (reconnectTimers.has(device.id)) continue;
         statusUpdate(device.id, { color: 'yellow', text: 'connecting...' });
         kickoffConnection(device);

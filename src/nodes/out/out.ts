@@ -111,7 +111,6 @@ const nodeInit: NodeInitializer = (RED) => {
               }
               break;
             }
-            case 'msg':
             default: {
               payload = input[this.config.payload];
               break;

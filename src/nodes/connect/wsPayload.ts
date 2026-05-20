@@ -40,7 +40,7 @@ export function buildWsPayload(
       if (commands.includes(payload)) {
         return { payloads: [{ command: payload }] };
       }
-      if (extraCommands.includes(payload) && deviceState && deviceState.playerState) {
+      if (extraCommands.includes(payload) && deviceState?.playerState) {
         const currentPosition = deviceState.playerState.progress;
         const duration = deviceState.playerState.duration;
         const currentVolume = deviceState.volume || 0;
@@ -91,7 +91,7 @@ export function buildWsPayload(
       if (message.stopListening) {
         result.waitForListening = true;
       }
-      if (message.pauseMusic && deviceState && deviceState.playing) {
+      if (message.pauseMusic && deviceState?.playing) {
         result.needsStop = true;
         result.playAfterTTS = true;
       }
