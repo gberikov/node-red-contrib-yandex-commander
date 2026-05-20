@@ -91,6 +91,9 @@ export class GlagolClient extends EventEmitter {
       this.ws = undefined;
       try {
         ws.removeAllListeners();
+        // terminate() during CONNECTING aborts the handshake and emits 'error'
+        // asynchronously; swallow it so it doesn't surface as unhandled.
+        ws.on('error', () => {});
         ws.terminate();
       } catch {
         // ws already closed
