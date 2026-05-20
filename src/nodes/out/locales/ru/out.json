@@ -14,7 +14,9 @@
         "whisper": "Шёпотом",
         "default_command": "Команда",
         "music_id": "ID контента",
-        "music_type": "Тип контента"
+        "music_type": "Тип контента",
+        "cloud_fallback": "Облачный TTS",
+        "cloud_fallback_hint": "Использовать облако Яндекса, если станция недоступна по локальной сети"
     },
     "placeholder": {
         "name": "Название",
