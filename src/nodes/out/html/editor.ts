@@ -1,10 +1,29 @@
-declare const RED: any;
-declare const $: any;
+import type { EditorRED } from 'node-red';
 
-function fetchDevices(configNodeId: string, callback: (devices: any[]) => void) {
-  const config = RED.nodes.node(configNodeId);
+declare const RED: EditorRED;
+declare const $: JQueryStatic;
+
+interface DeviceSummary {
+  id: string;
+  name: string;
+  platform: string;
+  address?: string;
+  port?: number;
+}
+
+interface DevicesResponse {
+  devices: DeviceSummary[];
+}
+
+interface ConfigNodeShape {
+  id: string;
+  credentials?: { token?: string };
+}
+
+function fetchDevices(configNodeId: string, callback: (devices: DeviceSummary[]) => void) {
+  const config = RED.nodes.node(configNodeId) as unknown as ConfigNodeShape | null;
   if (!config) return;
-  $.getJSON(`stations/${config.id}`, (data: any) => {
+  $.getJSON(`stations/${config.id}`, (data: DevicesResponse) => {
     if (data.devices && data.devices.length > 0) {
       callback(data.devices);
     } else {
@@ -15,7 +34,7 @@ function fetchDevices(configNodeId: string, callback: (devices: any[]) => void) 
   });
 }
 
-function fetchDevicesByToken(config: any, callback: (devices: any[]) => void) {
+function fetchDevicesByToken(config: ConfigNodeShape, callback: (devices: DeviceSummary[]) => void) {
   const token = config.credentials?.token || $('#node-config-input-token').val();
   if (!token) return;
   $.ajax({
@@ -23,7 +42,7 @@ function fetchDevicesByToken(config: any, callback: (devices: any[]) => void) {
     method: 'POST',
     contentType: 'application/json',
     data: JSON.stringify({ token }),
-    success: (data: any) => {
+    success: (data: DevicesResponse) => {
       if (data.devices) callback(data.devices);
     },
   });
@@ -84,7 +103,7 @@ RED.nodes.registerType('yandex-commander-out', {
 });
 
 /** Инициализация редактора: настраивает typedInput для payload/effect, загружает устройства, управляет видимостью секций */
-function onOpen(this: any) {
+function onOpen(this: { station_id: string }) {
   const command = $('#node-input-input').val();
 
   $('#node-input-payload').typedInput({
@@ -134,8 +153,8 @@ function onOpen(this: any) {
 
   function loadDevices() {
     selector.empty();
-    fetchDevices($('#node-input-token').val(), (devices) => {
-      devices.forEach((device: any) => {
+    fetchDevices($('#node-input-token').val() as string, (devices) => {
+      devices.forEach((device: DeviceSummary) => {
         selector.append(`<option value="${device.id}">${device.name} (${device.id})</option>`);
         $(`#node-input-station_id :contains(${currentId})`).attr('selected', 'selected');
       });
@@ -148,7 +167,7 @@ function onOpen(this: any) {
   $('.command_options').hide();
   $(`.command_options-${command}`).show();
 
-  $('#node-input-input').on('change', function () {
+  $('#node-input-input').on('change', function (this: HTMLElement) {
     $('.command_options').hide();
     $(`.command_options-${$(this).val()}`).show();
 
@@ -160,7 +179,7 @@ function onOpen(this: any) {
     }
   });
 
-  $('#node-input-volumeFlag').on('change', function () {
+  $('#node-input-volumeFlag').on('change', function (this: HTMLElement) {
     if ($('#node-input-input').val() === 'tts' && $(this).prop('checked')) {
       $('#node-input-volume').show();
       $('#range-label').show();

@@ -1,5 +1,39 @@
-declare const RED: any;
-declare const $: any;
+import type { EditorRED } from 'node-red';
+
+declare const RED: EditorRED;
+declare const $: JQueryStatic;
+
+interface DeviceSummary {
+  id: string;
+  name: string;
+  platform: string;
+  address?: string;
+  port?: number;
+}
+
+interface DevicesResponse {
+  devices: DeviceSummary[];
+}
+
+interface ConfigNodeShape {
+  id: string;
+  credentials?: { token?: string };
+}
+
+interface ScheduleDayConfig {
+  dayNumber: number;
+  active: boolean;
+  from: string;
+  to: string;
+  phrase: string;
+}
+
+interface StationNodeInstance {
+  station_id: string;
+  sheduler?: ScheduleDayConfig[];
+  network?: { mode?: 'auto' | 'manual' };
+  connectionFlag?: boolean;
+}
 
 RED.nodes.registerType('yandex-commander-station', {
   category: 'Yandex Commander',
@@ -23,7 +57,7 @@ RED.nodes.registerType('yandex-commander-station', {
       value: {},
     },
     fixedAddress: {
-      validate: function (this: any, address: string) {
+      validate: function (this: { network: { mode?: string } }, address: string) {
         if (!Object.hasOwn(this.network, 'mode')) {
           return true;
         } else if (this.network.mode === 'auto') {
@@ -36,7 +70,7 @@ RED.nodes.registerType('yandex-commander-station', {
       },
     },
     fixedPort: {
-      validate: function (this: any, port: string) {
+      validate: function (this: { network: { mode?: string } }, port: string) {
         if (!Object.hasOwn(this.network, 'mode')) {
           return true;
         } else if (this.network.mode === 'auto') {
@@ -62,10 +96,10 @@ RED.nodes.registerType('yandex-commander-station', {
 });
 
 /** Получает список устройств: сначала пробует per-node endpoint, при неудаче — статический POST */
-function fetchDevices(configNodeId: string, callback: (devices: any[]) => void) {
-  const config = RED.nodes.node(configNodeId);
+function fetchDevices(configNodeId: string, callback: (devices: DeviceSummary[]) => void) {
+  const config = RED.nodes.node(configNodeId) as unknown as ConfigNodeShape | null;
   if (!config) return;
-  $.getJSON(`stations/${config.id}`, (data: any) => {
+  $.getJSON(`stations/${config.id}`, (data: DevicesResponse) => {
     if (data.devices && data.devices.length > 0) {
       callback(data.devices);
     } else {
@@ -76,7 +110,7 @@ function fetchDevices(configNodeId: string, callback: (devices: any[]) => void) 
   });
 }
 
-function fetchDevicesByToken(config: any, callback: (devices: any[]) => void) {
+function fetchDevicesByToken(config: ConfigNodeShape, callback: (devices: DeviceSummary[]) => void) {
   const token = config.credentials?.token || $('#node-config-input-token').val();
   if (!token) return;
   $.ajax({
@@ -84,7 +118,7 @@ function fetchDevicesByToken(config: any, callback: (devices: any[]) => void) {
     method: 'POST',
     contentType: 'application/json',
     data: JSON.stringify({ token }),
-    success: (data: any) => {
+    success: (data: DevicesResponse) => {
       if (data.devices) callback(data.devices);
     },
   });
@@ -95,17 +129,17 @@ function fetchDevicesByToken(config: any, callback: (devices: any[]) => void) {
  * Привязана к window, чтобы HTML-атрибут onclick="onRefresh()" нашёл функцию
  * после IIFE-бандлинга esbuild'ом.
  */
-(window as any).onRefresh = function onRefresh() {
+(window as unknown as { onRefresh: () => void }).onRefresh = function onRefresh() {
   const selector = $('#node-input-station_id');
   const currentId = selector.data('station_id');
 
   selector.empty();
-  fetchDevices($('#node-input-token').val(), (devices: any[]) => {
-    devices.forEach((device: any) => {
+  fetchDevices($('#node-input-token').val() as string, (devices: DeviceSummary[]) => {
+    devices.forEach((device: DeviceSummary) => {
       selector.append(`<option value="${device.id}">${device.name} (${device.id})</option>`);
-      $(`#node-input-station_id option[value=${currentId}]`).attr('selected', true);
+      $(`#node-input-station_id option[value=${currentId}]`).attr('selected', 'true');
       const addrPlaceholder = currentId === device.id && device.address ? device.address : '0.0.0.0';
-      const portPlaceholder = currentId === device.id && device.port ? device.port : '1961';
+      const portPlaceholder = currentId === device.id && device.port ? String(device.port) : '1961';
       $('#node-input-fixedAddress').attr('placeholder', addrPlaceholder);
       $('#node-input-fixedPort').attr('placeholder', portPlaceholder);
     });
@@ -113,8 +147,8 @@ function fetchDevicesByToken(config: any, callback: (devices: any[]) => void) {
 };
 
 /** Инициализация редактора: загружает список станций, заполняет расписание и сетевые настройки */
-function onOpen(this: any) {
-  const config = RED.nodes.node($('#node-input-token').val());
+function onOpen(this: StationNodeInstance) {
+  const config = RED.nodes.node($('#node-input-token').val() as string);
   const selector = $('#node-input-station_id');
   selector.empty();
   const currentId = this.station_id;
@@ -122,16 +156,20 @@ function onOpen(this: any) {
 
   function loadDevices() {
     selector.empty();
-    fetchDevices($('#node-input-token').val(), (devices) => {
-      devices.forEach((device: any) => {
+    fetchDevices($('#node-input-token').val() as string, (devices) => {
+      devices.forEach((device: DeviceSummary) => {
         selector.append(`<option value="${device.id}">${device.name} (${device.id})</option>`);
-        $(`#node-input-station_id :contains(${currentId})`).attr('selected', true);
-        currentId === device.id && device.address
-          ? $('#node-input-fixedAddress').attr('placeholder', device.address)
-          : $('#node-input-fixedAddress').attr('placeholder', '0.0.0.0');
-        currentId === device.id && device.port
-          ? $('#node-input-fixedPort').attr('placeholder', device.port)
-          : $('#node-input-fixedPort').attr('placeholder', '1961');
+        $(`#node-input-station_id :contains(${currentId})`).attr('selected', 'true');
+        if (currentId === device.id && device.address) {
+          $('#node-input-fixedAddress').attr('placeholder', device.address);
+        } else {
+          $('#node-input-fixedAddress').attr('placeholder', '0.0.0.0');
+        }
+        if (currentId === device.id && device.port) {
+          $('#node-input-fixedPort').attr('placeholder', String(device.port));
+        } else {
+          $('#node-input-fixedPort').attr('placeholder', '1961');
+        }
       });
     });
   }
@@ -143,11 +181,11 @@ function onOpen(this: any) {
   $('#node-input-station_id').on('change', () => {
     const selectedId = $('#node-input-station_id').val();
     if (selectedId) {
-      fetchDevices($('#node-input-token').val(), (devices) => {
-        const device = devices.find((dev: any) => dev.id === selectedId);
+      fetchDevices($('#node-input-token').val() as string, (devices) => {
+        const device = devices.find((dev: DeviceSummary) => dev.id === selectedId);
         if (device) {
           $('#node-input-fixedAddress').attr('placeholder', device.address || '0.0.0.0');
-          $('#node-input-fixedPort').attr('placeholder', device.port || '1961');
+          $('#node-input-fixedPort').attr('placeholder', device.port ? String(device.port) : '1961');
         }
       });
     }
@@ -162,11 +200,13 @@ function onOpen(this: any) {
     minutes = Number(minutes) < 10 ? `0${minutes}` : minutes;
     times[i] = `${hours}:${minutes}`;
   }
-  const sheduler = this.sheduler || [];
+  const sheduler: ScheduleDayConfig[] = this.sheduler || [];
 
-  $('.sheduler-block').each(function (this: any, i: number, block: any) {
+  $('.sheduler-block').each(function (this: HTMLElement, i: number, block: HTMLElement) {
     const currentDaySchedule =
-      i === 6 ? sheduler.find((el: any) => el.dayNumber === 0) : sheduler.find((el: any) => el.dayNumber === i + 1);
+      i === 6
+        ? sheduler.find((el: ScheduleDayConfig) => el.dayNumber === 0)
+        : sheduler.find((el: ScheduleDayConfig) => el.dayNumber === i + 1);
     const activeFlag = !currentDaySchedule ? true : currentDaySchedule.active;
     const startTime = !currentDaySchedule ? '0' : currentDaySchedule.from;
     const endTime = !currentDaySchedule ? '1440' : currentDaySchedule.to;
@@ -180,8 +220,8 @@ function onOpen(this: any) {
     });
     $(`#${fromSelect.attr('id')} option:last`).remove();
     $(`#${toSelect.attr('id')} option:first`).remove();
-    $(`#${fromSelect.attr('id')} option[value=${startTime}]`).attr('selected', true);
-    $(`#${toSelect.attr('id')} option[value=${endTime}]`).attr('selected', true);
+    $(`#${fromSelect.attr('id')} option[value=${startTime}]`).attr('selected', 'true');
+    $(`#${toSelect.attr('id')} option[value=${endTime}]`).attr('selected', 'true');
 
     if (checkbox.prop('checked')) {
       $(fromSelect).prop('disabled', false);
@@ -201,7 +241,7 @@ function onOpen(this: any) {
     });
   });
 
-  $('.status-button-group').on('click', function (this: any) {
+  $('.status-button-group').on('click', function (this: HTMLElement) {
     $('.status-button-group').removeClass('selected');
     $(this).addClass('selected');
   });
@@ -222,7 +262,7 @@ function onOpen(this: any) {
     $('#address-block').show();
   }
 
-  $('.ip-button-group').on('click', function (this: any) {
+  $('.ip-button-group').on('click', function (this: HTMLElement) {
     $('.ip-button-group').removeClass('selected');
     $(this).addClass('selected');
     const pressedButtonId = $(this).attr('id');
@@ -232,10 +272,12 @@ function onOpen(this: any) {
       $('#address-block').show();
       const selectedId = $('#node-input-station_id').val();
       if (selectedId && config) {
-        $.getJSON(`yandexdevices_${config.id}`, (data: any) => {
-          const device = data.devices.find((dev: any) => dev.id === selectedId);
-          $('#node-input-fixedAddress').attr('placeholder', device.address);
-          $('#node-input-fixedPort').attr('placeholder', device.port);
+        $.getJSON(`yandexdevices_${config.id}`, (data: DevicesResponse) => {
+          const device = data.devices.find((dev: DeviceSummary) => dev.id === selectedId);
+          if (device) {
+            $('#node-input-fixedAddress').attr('placeholder', device.address ?? '');
+            $('#node-input-fixedPort').attr('placeholder', device.port ? String(device.port) : '');
+          }
         });
       }
     }
@@ -243,22 +285,23 @@ function onOpen(this: any) {
 }
 
 /** Сохранение: собирает расписание, сетевые настройки и флаг подключения из UI */
-function onSave(this: any) {
-  const sheduler: any[] = [];
-  $('.sheduler-block').each(function (this: any, i: number, block: any) {
-    const scheduleDay: any = {};
+function onSave(this: StationNodeInstance) {
+  const sheduler: ScheduleDayConfig[] = [];
+  $('.sheduler-block').each(function (this: HTMLElement, i: number, block: HTMLElement) {
     const checkbox = $(block).children().first();
     const fromSelect = $(block).children('select').first();
     const toSelect = $(block).children('select').last();
     const activeFlag = checkbox.is(':checked');
-    const startTime = activeFlag ? fromSelect.val() : '0';
-    const endTime = activeFlag ? toSelect.val() : '1440';
-    const phrase = $('#node-input-phrase').val();
-    scheduleDay.active = activeFlag;
-    scheduleDay.from = startTime;
-    scheduleDay.to = endTime;
-    scheduleDay.phrase = phrase;
-    scheduleDay.dayNumber = i === 6 ? 0 : i + 1;
+    const startTime = activeFlag ? String(fromSelect.val() ?? '0') : '0';
+    const endTime = activeFlag ? String(toSelect.val() ?? '1440') : '1440';
+    const phrase = String($('#node-input-phrase').val() ?? '');
+    const scheduleDay: ScheduleDayConfig = {
+      active: activeFlag,
+      from: startTime,
+      to: endTime,
+      phrase,
+      dayNumber: i === 6 ? 0 : i + 1,
+    };
     sheduler.push(scheduleDay);
   });
   this.sheduler = sheduler;
