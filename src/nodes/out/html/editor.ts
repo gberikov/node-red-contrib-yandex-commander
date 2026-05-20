@@ -97,6 +97,9 @@ RED.nodes.registerType('yandex-commander-out', {
     musicType: {
       value: 'track',
     },
+    cloudFallback: {
+      value: false,
+    },
   },
   inputs: 1,
   outputs: 0,
