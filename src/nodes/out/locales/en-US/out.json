@@ -12,11 +12,14 @@
         "prevent_listening": "Prevent listening",
         "pause_while_tts": "Pause while TTS",
         "whisper": "Whisper",
-        "default_command": "Default command"
+        "default_command": "Default command",
+        "music_id": "Music ID",
+        "music_type": "Music type"
     },
     "placeholder": {
         "name": "Name",
-        "play_music": "Play music"
+        "play_music": "Play music",
+        "music_id": "track / artist / album / playlist / radio id"
     },
     "command": {
         "player": "Player",
@@ -24,7 +27,15 @@
         "voice": "Voice",
         "raw": "Raw",
         "stop_listening": "Stop listening",
-        "homekit": "Homekit"
+        "homekit": "Homekit",
+        "play_music": "Play Music"
+    },
+    "music_type": {
+        "track": "Track",
+        "artist": "Artist",
+        "album": "Album",
+        "playlist": "Playlist",
+        "radio": "Radio"
     },
     "voice": {
         "default": "Default",

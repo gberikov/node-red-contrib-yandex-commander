@@ -12,11 +12,14 @@
         "prevent_listening": "不等待回應",
         "pause_while_tts": "TTS 時暫停播放",
         "whisper": "耳語",
-        "default_command": "預設命令"
+        "default_command": "預設命令",
+        "music_id": "音樂 ID",
+        "music_type": "音樂類型"
     },
     "placeholder": {
         "name": "名稱",
-        "play_music": "播放音樂"
+        "play_music": "播放音樂",
+        "music_id": "曲目/藝人/專輯/播放清單/電台 ID"
     },
     "command": {
         "player": "播放器",
@@ -24,7 +27,15 @@
         "voice": "語音命令",
         "raw": "原始命令",
         "stop_listening": "停止監聽",
-        "homekit": "HomeKit"
+        "homekit": "HomeKit",
+        "play_music": "播放音樂"
+    },
+    "music_type": {
+        "track": "曲目",
+        "artist": "藝人",
+        "album": "專輯",
+        "playlist": "播放清單",
+        "radio": "電台"
     },
     "voice": {
         "default": "預設",

@@ -91,6 +91,12 @@ RED.nodes.registerType('yandex-commander-out', {
       value: null,
       required: false,
     },
+    musicId: {
+      value: '',
+    },
+    musicType: {
+      value: 'track',
+    },
   },
   inputs: 1,
   outputs: 0,

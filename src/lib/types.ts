@@ -101,7 +101,9 @@ export interface RegistrationBufferEntry {
 
 // ── WebSocket Message Types ──
 
-export type MessageType = 'command' | 'voice' | 'tts' | 'homekit' | 'raw' | 'stopListening';
+export type MessageType = 'command' | 'voice' | 'tts' | 'homekit' | 'raw' | 'stopListening' | 'playMusic';
+
+export type PlayMusicType = 'track' | 'artist' | 'album' | 'playlist' | 'radio';
 
 export interface WsPayload {
   command: string;
@@ -154,6 +156,10 @@ export interface OutMessage {
   pauseMusic?: boolean;
   hap?: { session?: unknown };
   level?: string;
+  /** Идентификатор контента для playMusic (track id, artist id, album id, playlist id, radio id). */
+  id?: string;
+  /** Тип контента для playMusic. */
+  type?: PlayMusicType;
 }
 
 // ── Connect Node Interfaces ──
@@ -235,4 +241,8 @@ export interface OutNodeConfig extends NodeDef {
   whisper: boolean;
   payload: string;
   payloadType: string;
+  /** Id контента для команды Play Music (track/artist/album/playlist/radio). */
+  musicId: string;
+  /** Тип контента для команды Play Music. */
+  musicType: PlayMusicType;
 }

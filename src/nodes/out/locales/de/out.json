@@ -12,11 +12,14 @@
         "prevent_listening": "Nicht auf Antwort warten",
         "pause_while_tts": "Wiedergabe bei TTS pausieren",
         "whisper": "Flüstern",
-        "default_command": "Standardbefehl"
+        "default_command": "Standardbefehl",
+        "music_id": "Musik-ID",
+        "music_type": "Musiktyp"
     },
     "placeholder": {
         "name": "Name",
-        "play_music": "Musik abspielen"
+        "play_music": "Musik abspielen",
+        "music_id": "Track-/Künstler-/Album-/Playlist-/Radio-ID"
     },
     "command": {
         "player": "Player",
@@ -24,7 +27,15 @@
         "voice": "Sprachbefehl",
         "raw": "Rohbefehl",
         "stop_listening": "Nicht mehr zuhören",
-        "homekit": "HomeKit"
+        "homekit": "HomeKit",
+        "play_music": "Musik abspielen"
+    },
+    "music_type": {
+        "track": "Track",
+        "artist": "Künstler",
+        "album": "Album",
+        "playlist": "Playlist",
+        "radio": "Radio"
     },
     "voice": {
         "default": "Standard",

@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-yandex-commander",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Manage Yandex Stations in Node-RED via WebSockets (local Glagol protocol + QR/OAuth)",
   "type": "commonjs",
   "packageManager": "pnpm@11.1.2",

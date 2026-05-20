@@ -12,11 +12,14 @@
         "prevent_listening": "응답 대기 안 함",
         "pause_while_tts": "TTS 중 재생 일시정지",
         "whisper": "속삭임",
-        "default_command": "기본 명령"
+        "default_command": "기본 명령",
+        "music_id": "음악 ID",
+        "music_type": "음악 유형"
     },
     "placeholder": {
         "name": "이름",
-        "play_music": "음악 재생"
+        "play_music": "음악 재생",
+        "music_id": "트랙/아티스트/앨범/플레이리스트/라디오 ID"
     },
     "command": {
         "player": "플레이어",
@@ -24,7 +27,15 @@
         "voice": "음성 명령",
         "raw": "원시 명령",
         "stop_listening": "듣기 중지",
-        "homekit": "HomeKit"
+        "homekit": "HomeKit",
+        "play_music": "음악 재생"
+    },
+    "music_type": {
+        "track": "트랙",
+        "artist": "아티스트",
+        "album": "앨범",
+        "playlist": "플레이리스트",
+        "radio": "라디오"
     },
     "voice": {
         "default": "기본",

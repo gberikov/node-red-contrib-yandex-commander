@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] — 2026-05-20
+
+### Added
+
+- New `playMusic` mode in the OUT node (alongside `command`, `voice`, `tts`,
+  `homekit`, `raw`, `stopListening`). Sends the local Glagol command
+  `{ "command": "playMusic", "id": "<id>", "type": "<type>" }` without
+  requiring users to drop into RAW mode. The Type field accepts
+  `track`, `artist`, `album`, `playlist`, `radio`. Both fields can be
+  overridden per message via `msg.id` and `msg.type`. Locale strings
+  added in all 9 supported locales.
+
 ## [0.2.0] — 2026-05-20
 
 Large architectural refactor. External `msg.payload` contracts for the

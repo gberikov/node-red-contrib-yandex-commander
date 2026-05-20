@@ -12,11 +12,14 @@
         "prevent_listening": "応答を待たない",
         "pause_while_tts": "TTS中に再生を一時停止",
         "whisper": "ささやき",
-        "default_command": "デフォルトコマンド"
+        "default_command": "デフォルトコマンド",
+        "music_id": "音楽 ID",
+        "music_type": "音楽の種類"
     },
     "placeholder": {
         "name": "名前",
-        "play_music": "音楽を再生"
+        "play_music": "音楽を再生",
+        "music_id": "トラック/アーティスト/アルバム/プレイリスト/ラジオ ID"
     },
     "command": {
         "player": "プレーヤー",
@@ -24,7 +27,15 @@
         "voice": "音声コマンド",
         "raw": "生コマンド",
         "stop_listening": "リスニング停止",
-        "homekit": "HomeKit"
+        "homekit": "HomeKit",
+        "play_music": "音楽を再生"
+    },
+    "music_type": {
+        "track": "トラック",
+        "artist": "アーティスト",
+        "album": "アルバム",
+        "playlist": "プレイリスト",
+        "radio": "ラジオ"
     },
     "voice": {
         "default": "デフォルト",
