@@ -1,6 +1,18 @@
-import type { NodeInitializer } from 'node-red';
+import type { Node, NodeDef, NodeInitializer, NodeMessage, NodeMessageInFlow } from 'node-red';
 import { preparePayload as buildPayload } from '@/lib/stationHelper';
 import type { ConnectNode, DeviceState, GetNodeConfig, NodeStatusData } from '@/lib/types';
+
+interface GetNodeRuntime extends Node<NodeDef> {
+  controller: ConnectNode | null;
+  output: string;
+  stationId: string;
+  homekitFormat: string;
+  lastState: DeviceState;
+  onStatus: (data: NodeStatusData) => void;
+  onInput: (msg: NodeMessageInFlow) => void;
+  onMessage: (message: DeviceState) => void;
+  onClose: () => void;
+}
 
 const nodeInit: NodeInitializer = (RED) => {
   /**
@@ -8,10 +20,10 @@ const nodeInit: NodeInitializer = (RED) => {
    * По входящему сообщению возвращает текущее состояние станции
    * в формате status (полный объект) или homekit (speaker/tv).
    */
-  function GetNodeConstructor(this: any, config: GetNodeConfig): void {
+  function GetNodeConstructor(this: GetNodeRuntime, config: GetNodeConfig): void {
     RED.nodes.createNode(this, config);
     const node = this;
-    node.controller = RED.nodes.getNode(config.token) as ConnectNode | null;
+    node.controller = RED.nodes.getNode(config.token) as unknown as ConnectNode | null;
     node.output = config.output;
     node.stationId = config.station_id;
     node.homekitFormat = config.homekitFormat;
@@ -19,7 +31,7 @@ const nodeInit: NodeInitializer = (RED) => {
     node.status({});
 
     /** Преобразует состояние устройства в payload нужного формата и прикрепляет к входящему сообщению */
-    function preparePayload(message: DeviceState, inputMsg: any): any {
+    function preparePayload(message: DeviceState, inputMsg: NodeMessage): NodeMessage {
       const prepared = buildPayload(node, message);
       if (typeof prepared.payload !== 'undefined') {
         inputMsg.payload = prepared.payload;
@@ -35,7 +47,7 @@ const nodeInit: NodeInitializer = (RED) => {
     };
 
     /** Обработчик входящего сообщения: отдаёт текущее состояние станции или пробрасывает msg */
-    node.onInput = (msg: any, _send: any, _done: any): void => {
+    node.onInput = (msg: NodeMessageInFlow): void => {
       node.debug(`current state: ${JSON.stringify(node.lastState)}`);
       if ('aliceState' in node.lastState) {
         node.send(preparePayload(node.lastState, msg));

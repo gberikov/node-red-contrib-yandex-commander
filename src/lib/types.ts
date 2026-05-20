@@ -1,9 +1,9 @@
-import type { Node, NodeDef } from 'node-red';
+import type { Node, NodeDef, NodeStatusFill } from 'node-red';
 
 // ── Node Status ──
 
 export interface NodeStatusData {
-  color: string;
+  color: NodeStatusFill;
   text: string;
 }
 
@@ -168,13 +168,24 @@ export interface ConnectNodeConfig extends NodeDef {}
  * Публичный интерфейс config-ноды yandex-commander-connect.
  * Используется другими нодами через RED.nodes.getNode(configId) as ConnectNode.
  * Внутренние структуры (registry, scheduler, ws-pool) — closure-локалы и сюда не входят.
+ *
+ * Подписки на динамические события: statusUpdate_<deviceId>, message_<deviceId>, deviceReady.
+ * Перекрываем on()/removeListener() Node-RED-узкими сигнатурами, чтобы принимать произвольные
+ * имена событий (Node<TCreds> ограничивает их 'input' / 'close').
  */
+// Стандартная сигнатура EventEmitter — listener получает гетерогенные аргументы события.
+// any[] здесь корректен (контравариантность параметров позволяет передавать конкретные хендлеры).
+// biome-ignore lint/suspicious/noExplicitAny: EventEmitter listener signature
+type EventListener = (...args: any[]) => void;
+
 export interface ConnectNode extends Node<ConnectCredentials> {
   token: string;
   getStatus: (id: string) => NodeStatusData;
   sendMessage: (deviceId: string, messageType: MessageType, message?: OutMessage) => string | undefined;
   registerDevice: (deviceId: string, nodeId: string, parameters: DeviceParameters) => number | undefined;
   unregisterDevice: (deviceId: string, nodeId: string) => number | undefined;
+  on(event: string | symbol, listener: EventListener): this;
+  removeListener(event: string | symbol, listener: EventListener): this;
 }
 
 // ── Station Node Interfaces ──

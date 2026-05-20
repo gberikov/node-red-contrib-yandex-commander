@@ -1,5 +1,32 @@
-import type { NodeInitializer } from 'node-red';
-import type { ConnectNode, NodeStatusData, OutNodeConfig } from '@/lib/types';
+import type { Node, NodeDef, NodeInitializer, NodeMessageInFlow } from 'node-red';
+import type { ConnectNode, MessageType, NodeStatusData, OutMessage, OutNodeConfig } from '@/lib/types';
+
+interface OutNodeRuntime extends Node<NodeDef> {
+  config: OutNodeConfig;
+  controller: ConnectNode | null;
+  input: MessageType;
+  stationId: string;
+  volumeFlag: boolean;
+  volume: number;
+  stopListening: boolean;
+  noTrackPhrase: string;
+  pauseMusic: boolean;
+  ttsVoice: string;
+  ttsEffect: string;
+  whisper: boolean;
+  onStatus: (data: NodeStatusData) => void;
+}
+
+interface OutInputMessage extends NodeMessageInFlow {
+  volume?: number;
+  whisper?: boolean;
+  voice?: string;
+  effect?: string;
+  prevent_listening?: string;
+  pause_music?: boolean;
+  hap?: { session?: unknown };
+  [key: string]: unknown;
+}
 
 const nodeInit: NodeInitializer = (RED) => {
   /**
@@ -7,13 +34,13 @@ const nodeInit: NodeInitializer = (RED) => {
    * Принимает входящие сообщения и отправляет команды на станцию:
    * tts (озвучка с голосом/эффектами/шёпотом), command, voice, homekit, raw.
    */
-  function OutNodeConstructor(this: any, config: OutNodeConfig): void {
+  function OutNodeConstructor(this: OutNodeRuntime, config: OutNodeConfig): void {
     RED.nodes.createNode(this, config);
 
     this.config = config;
-    this.controller = RED.nodes.getNode(config.token) as ConnectNode | null;
+    this.controller = RED.nodes.getNode(config.token) as unknown as ConnectNode | null;
 
-    this.input = config.input;
+    this.input = config.input as MessageType;
     this.stationId = config.station_id;
     this.volumeFlag = config.volumeFlag;
     this.volume = config.volume;
@@ -32,11 +59,11 @@ const nodeInit: NodeInitializer = (RED) => {
      * Для tts: получает payload из msg/flow/global/str/json, оборачивает в SSML-теги (голос, эффект, шёпот).
      * Для остальных типов: пробрасывает payload и hap напрямую.
      */
-    this.on('input', (input: any) => {
+    this.on('input', (input: OutInputMessage) => {
       this.debug(`input: ${JSON.stringify(input)}`);
 
       if (this.stationId) {
-        const data: any = {};
+        const data: OutMessage = { payload: undefined };
 
         // apply node's config
         if (this.volumeFlag) data.volume = this.volume / 100;
@@ -46,15 +73,16 @@ const nodeInit: NodeInitializer = (RED) => {
         if (this.pauseMusic) data.pauseMusic = this.pauseMusic;
 
         // redefine options from input
-        if ('volume' in input) data.volume = input.volume / 100;
+        if ('volume' in input && typeof input.volume === 'number') data.volume = input.volume / 100;
         if ('whisper' in input) data.whisper = !!input.whisper;
-        if ('voice' in input) this.ttsVoice = input.voice;
-        if ('effect' in input) this.ttsEffect = input.effect;
-        if ('prevent_listening' in input) data.noTrackPhrase = input.prevent_listening;
-        if ('pause_music' in input) data.pauseMusic = input.pause_music;
+        if ('voice' in input && typeof input.voice === 'string') this.ttsVoice = input.voice;
+        if ('effect' in input && typeof input.effect === 'string') this.ttsEffect = input.effect;
+        if ('prevent_listening' in input && typeof input.prevent_listening === 'string')
+          data.noTrackPhrase = input.prevent_listening;
+        if ('pause_music' in input) data.pauseMusic = !!input.pause_music;
 
-        if ('tts' === this.input) {
-          let payload: any;
+        if (this.input === 'tts') {
+          let payload: unknown;
           switch (this.config.payloadType) {
             case 'flow': {
               payload = this.context().flow.get(this.config.payload);
@@ -90,26 +118,28 @@ const nodeInit: NodeInitializer = (RED) => {
             }
           }
 
+          let textPayload: string;
           if (typeof payload !== 'undefined' && payload !== null) {
             // Coerce non-string payloads (numbers, objects) to string so SSML wrapping is safe.
-            data.payload = typeof payload === 'string' ? payload : String(payload);
+            textPayload = typeof payload === 'string' ? payload : String(payload);
             if (this.ttsVoice) {
-              data.payload = `<speaker voice='${this.ttsVoice}'>${data.payload}`;
+              textPayload = `<speaker voice='${this.ttsVoice}'>${textPayload}`;
             }
             if (this.ttsEffect) {
               const effectsArr = this.ttsEffect.split(',');
               for (const effect of effectsArr) {
-                data.payload = `<speaker effect='${effect}'>${data.payload}`;
+                textPayload = `<speaker effect='${effect}'>${textPayload}`;
               }
             }
             if (data.whisper) {
-              data.payload = `<speaker is_whisper='true'>${data.payload}`;
+              textPayload = `<speaker is_whisper='true'>${textPayload}`;
             }
           } else {
-            data.payload = '';
+            textPayload = '';
           }
+          data.payload = textPayload;
 
-          if (data.payload.length > 0) {
+          if (textPayload.length > 0 && this.controller) {
             this.controller.sendMessage(this.stationId, this.input, data);
             this.debug(
               `Sending data: station: ${this.stationId}, input type: ${this.input}, data: ${JSON.stringify(data)}`,
@@ -120,10 +150,12 @@ const nodeInit: NodeInitializer = (RED) => {
         } else {
           data.payload = input.payload;
           data.hap = input.hap;
-          this.controller.sendMessage(this.stationId, this.input, data);
-          this.debug(
-            `Sending data: station: ${this.stationId}, input type: ${this.input}, data: ${JSON.stringify(data)}`,
-          );
+          if (this.controller) {
+            this.controller.sendMessage(this.stationId, this.input, data);
+            this.debug(
+              `Sending data: station: ${this.stationId}, input type: ${this.input}, data: ${JSON.stringify(data)}`,
+            );
+          }
         }
       } else {
         this.debug('node.stationId is empty');
