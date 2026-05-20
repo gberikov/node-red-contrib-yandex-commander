@@ -60,6 +60,8 @@ The `yandex-commander-connect` config node used to be a god-object (~540 lines).
 | `GlagolClient` | `src/nodes/connect/glagolClient.ts` | Typed EventEmitter over WebSocket. Owns the watchdog timers (connect — 10s, frame — 10s) and the ping interval (1.5s). Does not reconnect — the reconnect policy lives outside. |
 | `nextBackoffMs` | `src/nodes/connect/backoff.ts` | Exponential backoff 5 → 10 → 20 → 40 → 60 sec with full-jitter ±25%. Protects against the thundering herd. |
 | `wsPayload` | `src/nodes/connect/wsPayload.ts` | Builds the WS payload for every MessageType (command/voice/tts/homekit/raw/stopListening). Pure function. |
+| `cloudRoute` | `src/nodes/connect/cloudRoute.ts` | "Local path or cloud" decision for TTS — accounts for the fallback checkbox, `msg.cloud`, and WebSocket state. Pure function. |
+| `QuasarCloud` | `src/lib/quasarCloud.ts` | HTTP client for cloud TTS on top of the Quasar API: finds/creates the `ЯC <hex_id>` scenario and triggers it. |
 | `discovery` | `src/nodes/connect/discovery.ts` | mDNS discovery + cloud `networkInfo` fallback. |
 | `scheduler` | `src/nodes/connect/scheduler.ts` | Quiet-hours check from station parameters. Pure function. |
 
@@ -67,7 +69,7 @@ The `yandex-commander-connect` config node used to be a god-object (~540 lines).
 
 ## Tests
 
-The pure modules are covered by [Vitest](https://vitest.dev/) — 59 cases, runs in ~250 ms.
+The pure modules are covered by [Vitest](https://vitest.dev/) — 88 cases, runs in ~300 ms.
 
 ```
 tests/
@@ -76,7 +78,9 @@ tests/
 ├── backoff.test.ts         # exponential + jitter
 ├── ttsStateMachine.test.ts # arm/flush/reset
 ├── registry.test.ts        # upsert/ready/active
-└── wsPayload.test.ts       # all MessageType + edge cases
+├── wsPayload.test.ts       # all MessageType + edge cases
+├── cloudRoute.test.ts      # local-vs-cloud TTS routing
+└── quasarCloud.test.ts     # Quasar API: TTS scenarios
 ```
 
 Config — `vitest.config.ts` at the root. The `@/*` alias is configured via `resolve.alias` (Vite reads tsconfig paths automatically).
@@ -183,6 +187,7 @@ pnpm format      # format only
 │   │   ├── api.ts               # QuasarApi — HTTP calls to Yandex Quasar API
 │   │   ├── api/device.ts        # Device types
 │   │   ├── auth.ts              # YandexAuth — QR OAuth via passport
+│   │   ├── quasarCloud.ts       # Cloud TTS via Quasar scenarios
 │   │   ├── stationHelper.ts     # Payload formatting (status/homekit)
 │   │   └── types.ts             # Shared interfaces
 │   ├── types/
@@ -195,17 +200,18 @@ pnpm format      # format only
 │       │   ├── glagolClient.ts  # Typed WS client
 │       │   ├── backoff.ts       # Exponential backoff + jitter
 │       │   ├── wsPayload.ts     # WS payload builder
+│       │   ├── cloudRoute.ts    # Local/cloud routing for TTS
 │       │   ├── discovery.ts     # mDNS + cloud fallback
 │       │   ├── scheduler.ts     # Quiet-hours check
 │       │   ├── types.ts         # Re-exported types
-│       │   └── html/
-│       │       ├── editor.ts
-│       │       └── editor.html
-│       ├── station/             # Same structure
+│       │   ├── html/
+│       │   │   ├── editor.ts
+│       │   │   └── editor.html
+│       │   └── locales/         # i18n (9 locales)
+│       ├── station/             # Same structure (+ locales/)
 │       ├── in/
 │       ├── get/
 │       └── out/
-│           └── locales/         # i18n (9 locales)
 ├── tests/                       # Vitest cases
 └── build/                       # Build output (gitignored)
 ```

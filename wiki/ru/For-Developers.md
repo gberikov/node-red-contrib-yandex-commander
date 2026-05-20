@@ -60,6 +60,8 @@ Config-нода `yandex-commander-connect` исторически была god-o
 | `GlagolClient` | `src/nodes/connect/glagolClient.ts` | Типизированный EventEmitter над WebSocket. Владеет watchdog-таймерами (connect — 10s, frame — 10s) и ping-интервалом (1.5s). Сам не реконнектится — политика reconnect снаружи. |
 | `nextBackoffMs` | `src/nodes/connect/backoff.ts` | Экспоненциальный backoff 5 → 10 → 20 → 40 → 60 сек с full-jitter ±25%. Защищает от thundering herd. |
 | `wsPayload` | `src/nodes/connect/wsPayload.ts` | Конструктор полезной нагрузки для всех MessageType (command/voice/tts/homekit/raw/stopListening). Чистая функция. |
+| `cloudRoute` | `src/nodes/connect/cloudRoute.ts` | Решение «местный путь или облако» для TTS: учитывает чекбокс fallback, `msg.cloud`, состояние WebSocket. Чистая функция. |
+| `QuasarCloud` | `src/lib/quasarCloud.ts` | HTTP-клиент облачного TTS поверх Quasar API: поиск/создание сценария `ЯC <hex_id>` и его запуск. |
 | `discovery` | `src/nodes/connect/discovery.ts` | mDNS-обнаружение + cloud `networkInfo` fallback. |
 | `scheduler` | `src/nodes/connect/scheduler.ts` | Проверка «тихих часов» из настроек станции. Чистая функция. |
 
@@ -67,7 +69,7 @@ Config-нода `yandex-commander-connect` исторически была god-o
 
 ## Тесты
 
-Чистые модули покрыты юнит-тестами через [Vitest](https://vitest.dev/) — 59 кейсов, прогон ~250 мс.
+Чистые модули покрыты юнит-тестами через [Vitest](https://vitest.dev/) — 88 кейсов, прогон ~300 мс.
 
 ```
 tests/
@@ -76,7 +78,9 @@ tests/
 ├── backoff.test.ts         # экспоненциал + jitter
 ├── ttsStateMachine.test.ts # arm/flush/reset
 ├── registry.test.ts        # upsert/ready/active
-└── wsPayload.test.ts       # все MessageType + edge-cases
+├── wsPayload.test.ts       # все MessageType + edge-cases
+├── cloudRoute.test.ts      # выбор local/cloud для TTS
+└── quasarCloud.test.ts     # Quasar API: сценарии TTS
 ```
 
 Конфиг — `vitest.config.ts` в корне. Алиас `@/*` настроен через `resolve.alias` (Vite reads tsconfig paths automatically).
@@ -183,6 +187,7 @@ pnpm format      # только форматирование
 │   │   ├── api.ts               # QuasarApi — HTTP-запросы к Yandex Quasar API
 │   │   ├── api/device.ts        # Типы устройств
 │   │   ├── auth.ts              # YandexAuth — QR-флоу OAuth через passport
+│   │   ├── quasarCloud.ts       # Облачный TTS через Quasar-сценарии
 │   │   ├── stationHelper.ts     # Форматирование payload (status/homekit)
 │   │   └── types.ts             # Общие интерфейсы
 │   ├── types/
@@ -195,17 +200,18 @@ pnpm format      # только форматирование
 │       │   ├── glagolClient.ts  # Типизированный WS-клиент
 │       │   ├── backoff.ts       # Экспоненциальный backoff + jitter
 │       │   ├── wsPayload.ts     # Конструктор WS-команд
+│       │   ├── cloudRoute.ts    # Решение local/cloud для TTS
 │       │   ├── discovery.ts     # mDNS + cloud fallback
 │       │   ├── scheduler.ts     # Проверка «тихих часов»
 │       │   ├── types.ts         # Re-export типов
-│       │   └── html/
-│       │       ├── editor.ts
-│       │       └── editor.html
-│       ├── station/             # Аналогичная структура
+│       │   ├── html/
+│       │   │   ├── editor.ts
+│       │   │   └── editor.html
+│       │   └── locales/         # i18n (9 локалей)
+│       ├── station/             # Аналогичная структура (+ locales/)
 │       ├── in/
 │       ├── get/
 │       └── out/
-│           └── locales/         # i18n (9 локалей)
 ├── tests/                       # Vitest-кейсы
 └── build/                       # Результат сборки (gitignored)
 ```
