@@ -7,67 +7,67 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.0] — 2026-05-20
 
-Большой архитектурный рефактор. Внешние контракты `msg.payload` для нод
-`station`, `get`, `in`, `out` не изменились; внутренние структуры переработаны
-и теперь покрыты юнит-тестами.
+Large architectural refactor. External `msg.payload` contracts for the
+`station`, `get`, `in`, and `out` nodes are unchanged; internal structures
+have been reworked and are now covered by unit tests.
 
 ### Added
 
-- `engines.node: ">=18.5"` и `node-red.version: ">=4.0.0"` в `package.json`.
-- Юнит-тесты (vitest, 59 кейсов) для чистых модулей: `stationHelper`,
+- `engines.node: ">=18.5"` and `node-red.version: ">=4.0.0"` in `package.json`.
+- Unit tests (vitest, 59 cases) for the pure modules: `stationHelper`,
   `wsPayload`, `scheduler`, `ttsStateMachine`, `backoff`, `registry`.
-- `DeviceRegistry` (`src/nodes/connect/registry.ts`) — единый источник
-  правды по списку устройств.
-- `TtsStateMachine` (`src/nodes/connect/ttsStateMachine.ts`) — вынесена
-  post-TTS логика из обработчика WS-сообщений.
-- `GlagolClient` (`src/nodes/connect/glagolClient.ts`) — типизированный
-  EventEmitter поверх WebSocket, инкапсулирует watchdog/ping/cleanup.
-- `nextBackoffMs` (`src/nodes/connect/backoff.ts`) — экспоненциальный
-  backoff с full-jitter для reconnect.
-- `files` whitelist в `package.json` — публикуется только `build/`, README,
-  LICENSE, CHANGELOG.
+- `DeviceRegistry` (`src/nodes/connect/registry.ts`) — single source of
+  truth for the device list.
+- `TtsStateMachine` (`src/nodes/connect/ttsStateMachine.ts`) — post-TTS
+  logic extracted from the WebSocket frame handler.
+- `GlagolClient` (`src/nodes/connect/glagolClient.ts`) — typed EventEmitter
+  over WebSocket, encapsulating watchdog, ping, and cleanup.
+- `nextBackoffMs` (`src/nodes/connect/backoff.ts`) — exponential backoff
+  with full-jitter for reconnects.
+- `files` whitelist in `package.json` — only `build/`, README, LICENSE,
+  and CHANGELOG are published to npm.
 - Scripts `test`, `test:watch`, `typecheck`, `build:prod`.
 
 ### Changed
 
 - TypeScript `strict: true`, `noUncheckedIndexedAccess: true`,
-  `isolatedModules: true`. Все ошибки strict устранены.
-- Конфиг-нода `connect` декомпозирована: четыре параллельных списка
-  устройств (`deviceList`, `readyList`, `activeStationList`,
-  `registrationBuffer`) заменены на `DeviceRegistry` + closure-локальный
-  буфер.
-- Reconnect: фиксированные 60 секунд заменены на экспоненциальный backoff
-  5 → 10 → 20 → 40 → 60 сек с ±25% jitter.
-- Watchdog на установление соединения уменьшен с 60 до 10 секунд.
+  `isolatedModules: true`. All strict-mode errors have been resolved.
+- The `connect` config node is decomposed: four parallel device lists
+  (`deviceList`, `readyList`, `activeStationList`, `registrationBuffer`)
+  are replaced with `DeviceRegistry` plus a closure-local buffer.
+- Reconnect: the fixed 60-second delay is replaced with exponential
+  backoff (5 → 10 → 20 → 40 → 60 seconds) with ±25% jitter.
+- The connect watchdog has been tightened from 60 to 10 seconds.
 - esbuild: editor target `es2015 → es2020`, runtime `es2021 → es2022`;
-  убран самопальный alias-plugin (esbuild читает `paths` из tsconfig
-  напрямую).
-- Biome: `lineEnding: lf` (кроссплатформенно), `trailingCommas: all`
-  (современный default), `lineWidth: 120`.
-- HTTP-маршруты `/yandex-commander/*` уже были защищены через
-  `RED.auth.needsPermission('yandex-commander-connect.read')` — оставлено
-  без изменений.
+  the custom alias plugin has been removed (esbuild reads `paths` from
+  `tsconfig.json` directly).
+- Biome: `lineEnding: lf` (cross-platform friendly), `trailingCommas: all`
+  (modern default), `lineWidth: 120`.
+- HTTP routes `/yandex-commander/*` were already protected by
+  `RED.auth.needsPermission('yandex-commander-connect.read')` and are
+  left unchanged.
 
 ### Removed
 
-- Поля `deviceList`, `readyList`, `activeStationList`,
-  `registrationBuffer`, `interval` из публичного интерфейса `ConnectNode`
-  (используются только внутри config-ноды).
-- Поля `ws`, `watchDog`, `watchDogConn`, `timer`, `pingInterval`,
+- Fields `deviceList`, `readyList`, `activeStationList`,
+  `registrationBuffer`, `interval` from the public `ConnectNode`
+  interface (they are used only inside the config node).
+- Fields `ws`, `watchDog`, `watchDogConn`, `timer`, `pingInterval`,
   `waitForListening`, `playAfterTTS`, `waitForIdle`, `savedVolumeLevel`,
-  `schedulerFlag` из `RuntimeDevice` — переехали в `GlagolClient` и
-  `TtsStateMachine`.
+  `schedulerFlag` from `RuntimeDevice` — they moved into `GlagolClient`
+  and `TtsStateMachine`.
 
 ### Fixed
 
-- `noUncheckedIndexedAccess` поднял потенциальные `undefined`-обращения
-  в `auth.ts` (regex matches, `split('=')`) и `discovery.ts`
-  (mDNS SRV-record). Добавлены явные проверки.
-- Добавлен ambient `.d.ts` для `node-dns-sd` — устраняет `TS7016`.
+- `noUncheckedIndexedAccess` surfaced potential `undefined` accesses in
+  `auth.ts` (regex matches, `split('=')`) and `discovery.ts` (mDNS
+  SRV record). Explicit guards have been added.
+- Added an ambient `.d.ts` for `node-dns-sd` — fixes `TS7016`.
 
 ## [0.1.0] — initial
 
-- Форк `node-red-contrib-yandex-station-management`, миграция на TypeScript.
-- Локальное управление через Glagol WebSocket-протокол.
-- QR-авторизация через passport.yandex.ru.
-- mDNS discovery + cloud networkInfo fallback.
+- Fork of `node-red-contrib-yandex-station-management`, migrated to
+  TypeScript.
+- Local control via the Glagol WebSocket protocol.
+- QR-code authorization via passport.yandex.ru.
+- mDNS discovery plus cloud `networkInfo` fallback.
