@@ -6,6 +6,20 @@ interface ConnectEditorNodeCredentials {
   token: string;
 }
 
+interface QrStartResponse {
+  qrSvg: string;
+  sessionId: string;
+}
+
+interface QrStatusResponse {
+  status: 'pending' | 'ok';
+  token?: string;
+}
+
+interface JQueryErrorPayload {
+  responseJSON?: { error?: string };
+}
+
 declare const RED: EditorRED;
 
 RED.nodes.registerType<ConnectEditorNodeProperties, ConnectEditorNodeCredentials>('yandex-commander-connect', {
@@ -49,7 +63,7 @@ async function startQRAuth() {
   $('#qr-status').show().html(RED._('yandex-commander-connect.qr.initializing')).css('color', 'black');
 
   try {
-    const res: any = await $.post('/yandex-commander/auth/qr');
+    const res = (await $.post('/yandex-commander/auth/qr')) as QrStartResponse;
 
     // Display the SVG QR code from Yandex directly
     $('#qr-container').show().html(res.qrSvg);
@@ -58,7 +72,9 @@ async function startQRAuth() {
     // Poll status every 2 seconds
     activePollInterval = setInterval(async () => {
       try {
-        const status: any = await $.post('/yandex-commander/auth/qr/status', { sessionId: res.sessionId });
+        const status = (await $.post('/yandex-commander/auth/qr/status', {
+          sessionId: res.sessionId,
+        })) as QrStatusResponse;
         if (status.status === 'ok') {
           cleanupPolling();
           $('#node-config-input-token').val(status.token);
@@ -77,8 +93,10 @@ async function startQRAuth() {
       resetUI();
       $('#qr-status').html(RED._('yandex-commander-connect.qr.timeout')).css('color', 'red');
     }, 300000);
-  } catch (err: any) {
-    const msg = err?.responseJSON?.error || RED._('yandex-commander-connect.qr.unknown_error');
+  } catch (err) {
+    const msg =
+      (err as JQueryErrorPayload | undefined)?.responseJSON?.error ??
+      RED._('yandex-commander-connect.qr.unknown_error');
     const isCaptcha = msg.includes('капчи') || msg.includes('captcha') || msg.includes('Captcha');
 
     let html = `<span style="color: red;">${msg}</span>`;

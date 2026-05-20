@@ -5,8 +5,19 @@ interface StationNode {
   homekitFormat: string;
 }
 
+export interface HomekitSpeakerPayload {
+  CurrentMediaState: 0 | 1;
+  configuredName: string;
+}
+
+export interface HomekitTvPayload {
+  Active: 0 | 1;
+}
+
+export type PreparedPayloadValue = DeviceState | HomekitSpeakerPayload | HomekitTvPayload;
+
 interface PreparedPayload {
-  payload?: any;
+  payload?: PreparedPayloadValue;
 }
 
 /**

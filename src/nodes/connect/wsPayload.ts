@@ -2,6 +2,10 @@ import type { DeviceState, MessageType, OutMessage, WsPayload } from '@/lib/type
 
 type DebugFn = (msg: string) => void;
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
 export interface WsPayloadResult {
   payloads: WsPayload[];
   /** Флаг: нужно ожидать LISTENING и прекратить прослушивание */
@@ -31,52 +35,54 @@ export function buildWsPayload(
   const extraCommands = ['forward', 'backward', 'volumeup', 'volumedown', 'volume'];
 
   switch (messageType) {
-    case 'command':
-      if (commands.includes(message.payload)) {
-        return { payloads: [{ command: message.payload }] };
+    case 'command': {
+      const payload = typeof message.payload === 'string' ? message.payload : '';
+      if (commands.includes(payload)) {
+        return { payloads: [{ command: payload }] };
       }
-      if (extraCommands.includes(message.payload) && deviceState && deviceState.playerState) {
+      if (extraCommands.includes(payload) && deviceState?.playerState) {
         const currentPosition = deviceState.playerState.progress;
         const duration = deviceState.playerState.duration;
         const currentVolume = deviceState.volume || 0;
         debug(`current volume: ${currentVolume}`);
 
-        if (message.payload === 'forward') {
+        if (payload === 'forward') {
           const targetPosition = currentPosition + 10;
           if (targetPosition < duration) {
             return { payloads: [{ command: 'rewind', position: targetPosition }] };
           }
           return buildWsPayload('command', { payload: 'next' } as OutMessage, deviceState, debug);
         }
-        if (message.payload === 'backward') {
+        if (payload === 'backward') {
           const targetPosition = currentPosition - 10;
           return { payloads: [{ command: 'rewind', position: Math.max(targetPosition, 0) }] };
         }
-        if (message.payload === 'volumeup') {
+        if (payload === 'volumeup') {
           debug(String(currentVolume));
           if (currentVolume < 1.0) {
             return { payloads: [{ command: 'setVolume', volume: currentVolume + 0.1 }] };
           }
           return { payloads: [{ command: 'softwareVersion' }] };
         }
-        if (message.payload === 'volumedown') {
+        if (payload === 'volumedown') {
           debug(String(currentVolume));
           if (currentVolume > 0.0) {
             return { payloads: [{ command: 'setVolume', volume: currentVolume - 0.1 }] };
           }
           return { payloads: [{ command: 'softwareVersion' }] };
         }
-        if (message.payload === 'volume') {
+        if (payload === 'volume') {
           return { payloads: [{ command: 'setVolume', volume: parseFloat(message.level || '0') }] };
         }
         return { payloads: [{ command: 'softwareVersion' }] };
       }
-      debug(`Bad command ${message.payload}`);
+      debug(`Bad command ${payload}`);
       return { payloads: [{ command: 'softwareVersion' }] };
+    }
 
     case 'voice':
-      debug(`Message Voice command: ${message}`);
-      return { payloads: [{ command: 'sendText', text: message.payload }] };
+      debug(`Message Voice command: ${JSON.stringify(message)}`);
+      return { payloads: [{ command: 'sendText', text: String(message.payload ?? '') }] };
 
     case 'tts': {
       debug(`Message TTS: ${message}`);
@@ -85,7 +91,7 @@ export function buildWsPayload(
       if (message.stopListening) {
         result.waitForListening = true;
       }
-      if (message.pauseMusic && deviceState && deviceState.playing) {
+      if (message.pauseMusic && deviceState?.playing) {
         result.needsStop = true;
         result.playAfterTTS = true;
       }
@@ -117,7 +123,8 @@ export function buildWsPayload(
 
     case 'homekit': {
       debug(`HAP: ${JSON.stringify(message)} PL: ${JSON.stringify(message.payload)}`);
-      if (message.hap && 'session' in message.hap) {
+      if (message.hap && 'session' in message.hap && isRecord(message.payload)) {
+        const hapPayload = message.payload;
         let playing = false;
         let id: string | null = null;
         const noTrackPhrase = message.noTrackPhrase;
@@ -132,8 +139,8 @@ export function buildWsPayload(
         }
 
         // speaker
-        if ('TargetMediaState' in message.payload) {
-          const TargetMediaState = message.payload.TargetMediaState;
+        if ('TargetMediaState' in hapPayload) {
+          const TargetMediaState = hapPayload.TargetMediaState;
           if (id) {
             return buildWsPayload(
               'command',
@@ -147,8 +154,8 @@ export function buildWsPayload(
         }
 
         // tv
-        if ('Active' in message.payload) {
-          const Active = message.payload.Active;
+        if ('Active' in hapPayload) {
+          const Active = hapPayload.Active;
           if (id) {
             return buildWsPayload('command', { payload: Active ? 'play' : 'stop' } as OutMessage, deviceState, debug);
           } else if (!id && Active && noTrackPhrase) {
@@ -157,8 +164,8 @@ export function buildWsPayload(
         }
 
         // tv + RemoteKey
-        if ('RemoteKey' in message.payload) {
-          const RemoteKey = message.payload.RemoteKey;
+        if ('RemoteKey' in hapPayload) {
+          const RemoteKey = hapPayload.RemoteKey;
           switch (RemoteKey) {
             case '7':
               return buildWsPayload('command', { payload: 'forward' } as OutMessage, deviceState, debug);
@@ -180,8 +187,8 @@ export function buildWsPayload(
         }
 
         // tv + VolumeSelector
-        if ('VolumeSelector' in message.payload) {
-          const VolumeSelector = message.payload.VolumeSelector;
+        if ('VolumeSelector' in hapPayload) {
+          const VolumeSelector = hapPayload.VolumeSelector;
           return buildWsPayload(
             'command',
             { payload: VolumeSelector ? 'volumedown' : 'volumeup' } as OutMessage,
@@ -198,9 +205,9 @@ export function buildWsPayload(
 
     case 'raw':
       if (Array.isArray(message.payload)) {
-        return { payloads: message.payload };
+        return { payloads: message.payload as WsPayload[] };
       }
-      return { payloads: [message.payload] };
+      return { payloads: [message.payload as WsPayload] };
 
     case 'stopListening':
       return {

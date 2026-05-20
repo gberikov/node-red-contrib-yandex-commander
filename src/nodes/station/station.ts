@@ -1,5 +1,27 @@
-import type { NodeInitializer } from 'node-red';
-import type { ConnectNode, NodeStatusData, RuntimeDevice, StationNodeConfig } from '@/lib/types';
+import type { Node, NodeDef, NodeInitializer } from 'node-red';
+import type {
+  ConnectNode,
+  NetworkConfig,
+  NodeStatusData,
+  RuntimeDevice,
+  SchedulerDay,
+  StationNodeConfig,
+} from '@/lib/types';
+
+interface StationNodeRuntime extends Node<NodeDef> {
+  controller: ConnectNode | null;
+  stationId: string;
+  sheduler: SchedulerDay[];
+  network: NetworkConfig;
+  fixedAddress: string;
+  fixedPort: string;
+  networkMode: 'auto' | 'manual';
+  connectionFlag: boolean;
+  registration?: boolean;
+  onStatus: (data: NodeStatusData) => void;
+  onDeviceReady: (device: RuntimeDevice) => void;
+  registerDevice: () => void;
+}
 
 const nodeInit: NodeInitializer = (RED) => {
   /**
@@ -7,10 +29,10 @@ const nodeInit: NodeInitializer = (RED) => {
    * Управляет конкретной станцией: регистрирует устройство в connect-ноде,
    * передаёт параметры подключения, расписание и сетевые настройки.
    */
-  function StationNodeConstructor(this: any, config: StationNodeConfig): void {
+  function StationNodeConstructor(this: StationNodeRuntime, config: StationNodeConfig): void {
     RED.nodes.createNode(this, config);
 
-    this.controller = RED.nodes.getNode(config.token) as ConnectNode | null;
+    this.controller = RED.nodes.getNode(config.token) as unknown as ConnectNode | null;
     this.stationId = config.station_id;
     this.sheduler = config.sheduler;
     this.network = config.network;
@@ -21,7 +43,7 @@ const nodeInit: NodeInitializer = (RED) => {
     this.status({});
 
     if (this.sheduler) {
-      this.sheduler.forEach((day: any) => {
+      this.sheduler.forEach((day: SchedulerDay) => {
         this.debug(JSON.stringify(day));
       });
     }
@@ -48,6 +70,7 @@ const nodeInit: NodeInitializer = (RED) => {
         sheduler: this.sheduler,
         network: { mode: this.networkMode, fixedAddress: this.fixedAddress, fixedPort: this.fixedPort },
       };
+      if (!this.controller) return;
       const status = this.controller.registerDevice(this.stationId, this.id, params);
       this.registration = status !== 2 && status !== undefined;
     };

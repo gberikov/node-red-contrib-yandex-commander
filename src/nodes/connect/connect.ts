@@ -1,5 +1,7 @@
+import type { Request, Response } from 'express';
 import type { NodeInitializer } from 'node-red';
 import { QuasarApi } from '@/lib/api';
+import type { Device } from '@/lib/api/device';
 import { YandexAuth } from '@/lib/auth';
 import type {
   ConnectNode,
@@ -20,6 +22,19 @@ import { DeviceRegistry } from './registry';
 import { checkScheduler } from './scheduler';
 import { TtsStateMachine } from './ttsStateMachine';
 import { buildWsPayload } from './wsPayload';
+
+interface AxiosLikeError extends Error {
+  response?: { status?: number; data?: unknown };
+}
+
+function isAxiosLikeError(err: unknown): err is AxiosLikeError {
+  return err instanceof Error && 'response' in err;
+}
+
+function errMessage(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  return String(err);
+}
 
 const DEVICES_REFRESH_MS = 60_000;
 const SCHEDULER_GRACE_MS = 5_000;
@@ -68,7 +83,7 @@ const nodeInit: NodeInitializer = (RED) => {
       const device = registry.get(deviceId);
       if (!device) return undefined;
       const client = glagolClients.get(deviceId);
-      if (!client || !client.isOpen()) return 'Device offline';
+      if (!client?.isOpen()) return 'Device offline';
 
       try {
         const result = buildWsPayload(
@@ -197,7 +212,7 @@ const nodeInit: NodeInitializer = (RED) => {
         return;
       }
       const existing = glagolClients.get(device.id);
-      if (existing && existing.isOpen()) return;
+      if (existing?.isOpen()) return;
 
       statusUpdate(device.id, { color: 'yellow', text: 'connecting...' });
 
@@ -272,7 +287,7 @@ const nodeInit: NodeInitializer = (RED) => {
 
     function dispatchTtsAction(deviceId: string, action: { type: string; volume?: number }): void {
       const client = glagolClients.get(deviceId);
-      if (!client || !client.isOpen()) return;
+      if (!client?.isOpen()) return;
       if (action.type === 'stopListening') {
         sendMessage.call(node, deviceId, 'stopListening');
       } else if (action.type === 'play') {
@@ -337,7 +352,7 @@ const nodeInit: NodeInitializer = (RED) => {
       RED.httpAdmin.get(
         `/stations/${node.id}`,
         RED.auth.needsPermission('yandex-commander-connect.read'),
-        (_req: any, res: any) => {
+        (_req: Request, res: Response) => {
           res.json({ devices: registry.ready() });
         },
       );
@@ -347,7 +362,7 @@ const nodeInit: NodeInitializer = (RED) => {
       for (const device of registry.all()) {
         if (!device.address || !device.port) continue;
         const client = glagolClients.get(device.id);
-        if (client && client.isOpen()) continue;
+        if (client?.isOpen()) continue;
         if (reconnectTimers.has(device.id)) continue;
         statusUpdate(device.id, { color: 'yellow', text: 'connecting...' });
         kickoffConnection(device);
@@ -358,11 +373,13 @@ const nodeInit: NodeInitializer = (RED) => {
       try {
         const data = await api.getDevices();
         if (registry.size === 0) {
-          const initial: RuntimeDevice[] = data.devices.map((d: any) => ({
-            ...d,
-            parameters: d.parameters ?? {},
-            lastState: {},
-          }));
+          const initial: RuntimeDevice[] = data.devices.map(
+            (d: Device): RuntimeDevice => ({
+              ...d,
+              parameters: {},
+              lastState: {},
+            }),
+          );
           registry.replaceAll(initial);
         }
 
@@ -377,15 +394,15 @@ const nodeInit: NodeInitializer = (RED) => {
         try {
           await discoverDevices(registry.all(), node.debug.bind(node));
         } catch (err) {
-          node.debug(`mDNS discover error: ${err}`);
+          node.debug(`mDNS discover error: ${errMessage(err)}`);
         }
         applyCloudFallback(registry.all(), node.debug.bind(node));
 
         registerHttpRoute();
         processReadyDevices();
-      } catch (err: any) {
-        node.debug(String(err));
-        if (err.response?.status === 403) {
+      } catch (err) {
+        node.debug(errMessage(err));
+        if (isAxiosLikeError(err) && err.response?.status === 403) {
           node.error('Bad oAuth token');
         }
       }
@@ -427,8 +444,8 @@ const nodeInit: NodeInitializer = (RED) => {
   RED.httpAdmin.post(
     '/yandex-commander/devices',
     RED.auth.needsPermission('yandex-commander-connect.read'),
-    async (req: any, res: any) => {
-      const token = req.body?.token;
+    async (req: Request, res: Response) => {
+      const token = (req.body as { token?: string } | undefined)?.token;
       if (!token) {
         res.status(400).json({ error: 'Token is required' });
         return;
@@ -436,14 +453,14 @@ const nodeInit: NodeInitializer = (RED) => {
       try {
         const api = new QuasarApi(token);
         const data = await api.getDevices();
-        const devices = data.devices.map((d: any) => ({
+        const devices = data.devices.map((d: Device) => ({
           id: d.id,
           name: d.name,
           platform: d.platform,
         }));
         res.json({ devices });
-      } catch (err: any) {
-        res.status(500).json({ error: err.message || 'Failed to fetch devices' });
+      } catch (err) {
+        res.status(500).json({ error: errMessage(err) || 'Failed to fetch devices' });
       }
     },
   );
@@ -453,14 +470,16 @@ const nodeInit: NodeInitializer = (RED) => {
   RED.httpAdmin.post(
     '/yandex-commander/auth/qr',
     RED.auth.needsPermission('yandex-commander-connect.read'),
-    async (_req: any, res: any) => {
+    async (_req: Request, res: Response) => {
       try {
         const result = await yandexAuth.startQR();
         res.json(result);
-      } catch (err: any) {
-        const message = err.response
-          ? `${err.message} — ${err.response.status} ${JSON.stringify(err.response.data).substring(0, 200)}`
-          : err.message;
+      } catch (err) {
+        const baseMessage = errMessage(err);
+        const message =
+          isAxiosLikeError(err) && err.response
+            ? `${baseMessage} — ${err.response.status} ${JSON.stringify(err.response.data).substring(0, 200)}`
+            : baseMessage;
         RED.log.error(`[yandex-commander] QR auth error: ${message}`);
         res.status(500).json({ error: message });
       }
@@ -470,8 +489,8 @@ const nodeInit: NodeInitializer = (RED) => {
   RED.httpAdmin.post(
     '/yandex-commander/auth/qr/status',
     RED.auth.needsPermission('yandex-commander-connect.read'),
-    async (req: any, res: any) => {
-      const { sessionId } = req.body;
+    async (req: Request, res: Response) => {
+      const { sessionId } = (req.body as { sessionId?: string } | undefined) ?? {};
       if (!sessionId) {
         res.status(400).json({ error: 'sessionId is required' });
         return;
@@ -479,8 +498,8 @@ const nodeInit: NodeInitializer = (RED) => {
       try {
         const result = await yandexAuth.checkQR(sessionId);
         res.json(result);
-      } catch (err: any) {
-        res.status(500).json({ error: err.message });
+      } catch (err) {
+        res.status(500).json({ error: errMessage(err) });
       }
     },
   );

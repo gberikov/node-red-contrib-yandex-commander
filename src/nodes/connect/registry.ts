@@ -72,7 +72,7 @@ export class DeviceRegistry {
   /** True если устройство присутствует и имеет address+port. */
   isReady(id: string): boolean {
     const d = this.devices.get(id);
-    return !!(d && d.address && d.port);
+    return !!(d?.address && d.port);
   }
 
   /** Очищает реестр (на close). */

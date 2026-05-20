@@ -8,6 +8,24 @@ interface AuthSession {
   createdAt: number;
 }
 
+interface SubmitResponseData {
+  track_id?: string;
+  csrf_token?: string;
+}
+
+interface QrStatusResponseData {
+  status?: string;
+}
+
+interface OAuthTokenResponseData {
+  access_token?: string;
+}
+
+function errorMessage(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  return String(err);
+}
+
 const UA =
   'Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36';
 
@@ -85,8 +103,9 @@ export class YandexAuth {
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
         return await this.doStartQR();
-      } catch (err: any) {
-        if (err.message?.includes('captcha') || err.message?.includes('Captcha')) {
+      } catch (err) {
+        const message = errorMessage(err);
+        if (message.includes('captcha') || message.includes('Captcha')) {
           if (attempt < maxAttempts) {
             // Wait before retry: 3s, 6s
             await sleep(attempt * 3000);
@@ -123,7 +142,7 @@ export class YandexAuth {
       amHtml.match(/name="csrf_token"[^>]*value="([^"]+)"/) ||
       amHtml.match(/value="([^"]+)"[^>]*name="csrf_token"/) ||
       amHtml.match(/"csrf_token"\s*:\s*"([^"]+)"/);
-    if (!csrfMatch || !csrfMatch[1]) {
+    if (!csrfMatch?.[1]) {
       throw new Error('Failed to parse csrf_token from auth page');
     }
     const csrfToken = csrfMatch[1];
@@ -156,14 +175,14 @@ export class YandexAuth {
     }
 
     cookies = mergeCookies(cookies, submitResponse.headers['set-cookie']);
-    const submitData = submitResponse.data;
+    const submitData = submitResponse.data as SubmitResponseData;
 
     if (!submitData.track_id) {
       throw new Error(`Failed to obtain track_id`);
     }
 
     const trackId = submitData.track_id;
-    const newCsrf = submitData.csrf_token || csrfToken;
+    const newCsrf = submitData.csrf_token ?? csrfToken;
 
     // Step 3: Fetch the QR code SVG from Yandex
     const qrPageUrl = `https://passport.yandex.ru/auth/magic/code/?track_id=${trackId}`;
@@ -184,7 +203,7 @@ export class YandexAuth {
     cookies = mergeCookies(cookies, qrPageResponse.headers['set-cookie']);
     const qrSvg: string = qrPageResponse.data;
 
-    if (!qrSvg || !qrSvg.includes('<svg')) {
+    if (!qrSvg?.includes('<svg')) {
       throw new Error('Failed to fetch QR code SVG from Yandex');
     }
 
@@ -225,7 +244,8 @@ export class YandexAuth {
 
     session.cookies = mergeCookies(session.cookies, statusResponse.headers['set-cookie']);
 
-    if (statusResponse.data.status !== 'ok') {
+    const statusData = statusResponse.data as QrStatusResponseData;
+    if (statusData.status !== 'ok') {
       return { status: 'pending' };
     }
 
@@ -253,7 +273,7 @@ export class YandexAuth {
       },
     );
 
-    const xToken = xTokenResponse.data.access_token;
+    const xToken = (xTokenResponse.data as OAuthTokenResponseData).access_token;
     if (!xToken) {
       throw new Error('Failed to obtain x_token');
     }
@@ -275,7 +295,7 @@ export class YandexAuth {
       },
     );
 
-    const musicToken = musicTokenResponse.data.access_token;
+    const musicToken = (musicTokenResponse.data as OAuthTokenResponseData).access_token;
     if (!musicToken) {
       throw new Error('Failed to obtain music_token');
     }

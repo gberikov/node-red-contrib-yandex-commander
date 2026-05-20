@@ -33,13 +33,14 @@ export class QuasarApi {
   }
 
   /** Выполняет HTTP-запрос к Quasar API и возвращает типизированный ответ */
-  private async query<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: string, data?: any): Promise<T> {
+  private async query<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: string, data?: unknown): Promise<T> {
     const options = { method, url, data };
     try {
-      const { data: response } = await this.instance.request(options);
+      const { data: response } = await this.instance.request<T>(options);
       return response;
-    } catch (error: any) {
-      throw new Error(error.message || String(error));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(message);
     }
   }
 }

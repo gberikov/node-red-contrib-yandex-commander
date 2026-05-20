@@ -1,6 +1,18 @@
-import type { NodeInitializer } from 'node-red';
+import type { Node, NodeDef, NodeInitializer, NodeMessage } from 'node-red';
 import { preparePayload } from '@/lib/stationHelper';
 import type { ConnectNode, DeviceState, InNodeConfig, NodeStatusData } from '@/lib/types';
+
+interface InNodeRuntime extends Node<NodeDef> {
+  controller: ConnectNode | null;
+  stationId: string;
+  output: string;
+  uniqueFlag: boolean;
+  homekitFormat: string;
+  lastMessage: NodeMessage;
+  onMessage: (data: DeviceState) => void;
+  onStatus: (data: NodeStatusData) => void;
+  onClose: () => void;
+}
 
 const nodeInit: NodeInitializer = (RED) => {
   /**
@@ -8,10 +20,10 @@ const nodeInit: NodeInitializer = (RED) => {
    * Автоматически отправляет состояние станции на выход при каждом WS-обновлении.
    * Поддерживает форматы status и homekit, опционально фильтрует дубликаты.
    */
-  function InNodeConstructor(this: any, config: InNodeConfig): void {
+  function InNodeConstructor(this: InNodeRuntime, config: InNodeConfig): void {
     RED.nodes.createNode(this, config);
     const node = this;
-    node.controller = RED.nodes.getNode(config.token) as ConnectNode | null;
+    node.controller = RED.nodes.getNode(config.token) as unknown as ConnectNode | null;
     node.stationId = config.station_id;
     node.output = config.output;
     node.uniqueFlag = config.uniqueFlag;
@@ -22,15 +34,16 @@ const nodeInit: NodeInitializer = (RED) => {
     node.debug(`Node settings: ID: ${node.stationId}, Output Format: ${node.output}, HK: ${node.homekitFormat}`);
 
     /** Отправляет сообщение на выход ноды; в режиме homekit + uniqueFlag фильтрует дубликаты */
-    function sendMessage(message: any): void {
+    function sendMessage(message: { payload?: unknown }): void {
+      const outMsg = message as NodeMessage;
       if (node.uniqueFlag && node.output === 'homekit') {
         if (JSON.stringify(node.lastMessage.payload) !== JSON.stringify(message.payload)) {
-          node.send(message);
-          node.lastMessage = message;
+          node.send(outMsg);
+          node.lastMessage = outMsg;
           node.debug(`Sent message to Homekit: ${JSON.stringify(message)}`);
         }
       } else {
-        node.send(message);
+        node.send(outMsg);
       }
     }
 
