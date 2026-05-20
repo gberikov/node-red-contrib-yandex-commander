@@ -25,7 +25,9 @@ Multiple devices (tested) and multiple accounts (tested) are supported.
 
 - [Installation](Installation)
 - [Initial Setup](Initial-Setup)
-- [Building from source](Building)
+- **Development:**
+  - [For Developers](For-Developers) — architecture, TypeScript, esbuild, Biome, tests
+  - [Building from source](Building)
 
 ## Nodes
 

@@ -1,6 +1,6 @@
 # Building from source
 
-The project is written in TypeScript and uses esbuild for bundling. Package manager — pnpm.
+The project is written in TypeScript and uses esbuild as the bundler. Package manager — pnpm. Minimum Node.js version — 18.5.
 
 ## Install dependencies
 
@@ -11,47 +11,43 @@ pnpm install
 ## Build
 
 ```bash
-pnpm build
+pnpm build           # dev build with inline sourcemap
+pnpm build:prod      # production: no sourcemap, minified editor
+pnpm build:watch     # auto-rebuild runtime on file changes
 ```
 
-## Development mode
-
-Auto-rebuild on file changes:
+## Quality checks
 
 ```bash
-pnpm build:watch
+pnpm typecheck       # tsc --noEmit
+pnpm lint            # biome check
+pnpm lint:fix        # biome check --write (format + safe fixes)
+pnpm format          # format only
+pnpm test            # vitest run (59 unit tests)
+pnpm test:watch      # vitest watch
 ```
 
-## Linting & formatting
+For a detailed description of the architecture and tooling, see [For Developers](For-Developers).
 
-The project uses [Biome](https://biomejs.dev/) for linting and formatting.
-
-```bash
-# Check
-pnpm lint
-
-# Check with auto-fix
-pnpm lint:fix
-
-# Format
-pnpm format
-```
-
-## Project structure
+## Project structure (short)
 
 ```
 src/
 ├── lib/
-│   ├── api.ts            # QuasarApi — device discovery and tokens
-│   ├── api/device.ts     # Device definitions
-│   ├── stationHelper.ts  # Payload formatting (status/homekit)
+│   ├── api.ts            # QuasarApi
+│   ├── api/device.ts     # Device types
+│   ├── auth.ts           # QR OAuth flow
+│   ├── stationHelper.ts  # Payload formatting
 │   └── types.ts          # Shared types
-├── nodes/
-│   ├── connect/          # Config node (OAuth, mDNS, WebSocket)
-│   ├── station/          # Station node
-│   ├── in/               # IN node
-│   ├── get/              # GET node
-│   └── out/              # OUT node
+├── types/
+│   └── node-dns-sd.d.ts  # Ambient types
+└── nodes/
+    ├── connect/          # Config node (8 modules)
+    ├── station/
+    ├── in/
+    ├── get/
+    └── out/
+tests/                    # Vitest cases
 ```
 
 Each node contains:
@@ -70,3 +66,5 @@ build/nodes/
 ├── out/out.js, out.html, locales/
 └── icons/
 ```
+
+Before publishing to npm, run `pnpm build:prod`. The `files` field in `package.json` ensures the published tarball contains only `build/`, `README.md`, `LICENSE`, and `CHANGELOG.md`.
