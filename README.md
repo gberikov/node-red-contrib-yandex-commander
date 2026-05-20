@@ -35,20 +35,22 @@ npm i node-red-contrib-yandex-commander
 
 ## Документация
 
-Полная документация — в [Wiki](../../wiki):
+Полная документация в [Wiki](../../wiki):
 
-- [Установка и получение токена](../../wiki/Установка)
-- [Первоначальная настройка](../../wiki/Первоначальная-настройка)
-- [Нода Station](../../wiki/Нода-Station) · [IN](../../wiki/Нода-IN) · [GET](../../wiki/Нода-GET) · [OUT](../../wiki/Нода-OUT)
-- [RAW-команды](../../wiki/RAW-команды)
-- [Примеры использования](../../wiki/Примеры)
-- [FAQ](../../wiki/FAQ)
-- [Для разработчиков](../../wiki/Для-разработчиков)
-- [Сборка из исходников](../../wiki/Сборка)
+**Русский** ([Home](../../wiki/ru/Home))
+- [Установка и получение токена](../../wiki/ru/Installation)
+- [Первоначальная настройка](../../wiki/ru/Initial-Setup)
+- Ноды: [Station](../../wiki/ru/Station-Node) · [IN](../../wiki/ru/IN-Node) · [GET](../../wiki/ru/GET-Node) · [OUT](../../wiki/ru/OUT-Node)
+- [RAW-команды](../../wiki/ru/RAW-Commands)
+- [Примеры использования](../../wiki/ru/Examples)
+- [FAQ](../../wiki/ru/FAQ)
+- [Для разработчиков](../../wiki/ru/For-Developers)
+- [Сборка из исходников](../../wiki/ru/Building)
 
-### English
-
-- [Home](../../wiki/EN-Home) · [Installation](../../wiki/EN-Installation) · [Building from source](../../wiki/EN-Building)
+**English** ([Home](../../wiki/en/Home))
+- [Installation](../../wiki/en/Installation)
+- [Initial Setup](../../wiki/en/Initial-Setup)
+- [Building from source](../../wiki/en/Building)
 
 A Node-RED contrib package for controlling Yandex smart speakers through the local Glagol WebSocket protocol. Provides five nodes: a config node that owns the OAuth token and the device pool, a station node per device, plus IN / GET / OUT nodes for receiving state and sending commands (TTS, raw commands, HomeKit-style mappings).
 

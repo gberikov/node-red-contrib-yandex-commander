@@ -21,22 +21,20 @@
 
 ## Содержание
 
-- [Установка](Установка)
-- [Первоначальная настройка](Первоначальная-настройка)
+- [Установка](Installation)
+- [Первоначальная настройка](Initial-Setup)
 - **Ноды:**
-  - [Station](Нода-Station)
-  - [IN](Нода-IN)
-  - [GET](Нода-GET)
-  - [OUT](Нода-OUT)
-- [RAW-команды](RAW-команды)
-- [Примеры использования](Примеры)
+  - [Station](Station-Node)
+  - [IN](IN-Node)
+  - [GET](GET-Node)
+  - [OUT](OUT-Node)
+- [RAW-команды](RAW-Commands)
+- [Примеры использования](Examples)
 - [FAQ](FAQ)
 - **Разработка:**
-  - [Для разработчиков](Для-разработчиков) — TypeScript, esbuild, Biome
-  - [Сборка из исходников](Сборка)
+  - [Для разработчиков](For-Developers) — TypeScript, esbuild, Biome
+  - [Сборка из исходников](Building)
 
-### English
+---
 
-- [Home (EN)](EN-Home)
-- [Installation (EN)](EN-Installation)
-- [Building from source (EN)](EN-Building)
+🌐 **[English version](../en/Home)**

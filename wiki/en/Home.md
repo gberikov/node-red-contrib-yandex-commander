@@ -23,25 +23,27 @@ Multiple devices (tested) and multiple accounts (tested) are supported.
 
 ## Contents
 
-- [Installation](EN-Installation)
-- [Building from source](EN-Building)
+- [Installation](Installation)
+- [Initial Setup](Initial-Setup)
+- [Building from source](Building)
 
 ## Nodes
 
-The plugin consists of 4 nodes:
+The plugin consists of 5 nodes (1 config + 4 flow nodes):
 
-| Node      | Description                                             |
-|-----------|---------------------------------------------------------|
-| **IN**    | Automatically sends device status updates (raw & HomeKit) |
-| **GET**   | Returns the latest device status on any incoming message |
-| **OUT**   | Sends commands to the device (player, voice, TTS, RAW)  |
-| **Station** | Optional per-device settings (connection, network, kid control) |
+| Node          | Description                                                 |
+|---------------|-------------------------------------------------------------|
+| **Connect**   | Config node — OAuth token, device discovery, WebSocket pool |
+| **Station**   | Optional per-device settings (connection, network, kid control) |
+| **IN**        | Automatically sends device status updates (raw & HomeKit)   |
+| **GET**       | Returns the latest device status on any incoming message    |
+| **OUT**       | Sends commands to the device (player, voice, TTS, RAW)      |
 
 You need a Yandex Music token to work. Token can be obtained through:
 - Built-in OAuth in the module (experimental)
-- [Bot service](https://music-yandex-bot.ru) — see [Installation](EN-Installation) for details
+- [Bot service](https://music-yandex-bot.ru) — see [Installation](Installation) for details
 - [Yandex Music API method](https://github.com/MarshalX/yandex-music-api/discussions/513#discussioncomment-2729781)
 
-### Русская документация
+---
 
-- [Главная (RU)](Home)
+🌐 **[Русская версия](../ru/Home)**

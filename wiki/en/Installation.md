@@ -27,12 +27,4 @@ Go to https://music-yandex-bot.ru:
 
 Described [here](https://github.com/MarshalX/yandex-music-api/discussions/513#discussioncomment-2729781).
 
-## Initial setup
-
-1. Add any node from the `yandex-commander` set
-2. Enter the token in the Login section
-3. Save and click **Deploy** (required!)
-
-After deploying, available stations should appear in the **Station** field in node settings.
-
-If the station doesn't appear, wait a couple of minutes or restart Node-RED.
+Once you have the token, proceed to [Initial Setup](Initial-Setup).
