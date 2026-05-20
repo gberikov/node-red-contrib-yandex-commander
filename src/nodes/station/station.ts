@@ -1,5 +1,5 @@
-import { NodeInitializer } from 'node-red';
-import { StationNodeConfig, ConnectNode, NodeStatusData, RuntimeDevice } from '@/lib/types';
+import type { NodeInitializer } from 'node-red';
+import type { ConnectNode, NodeStatusData, RuntimeDevice, StationNodeConfig } from '@/lib/types';
 
 const nodeInit: NodeInitializer = (RED) => {
   /**
@@ -9,60 +9,60 @@ const nodeInit: NodeInitializer = (RED) => {
    */
   function StationNodeConstructor(this: any, config: StationNodeConfig): void {
     RED.nodes.createNode(this, config);
-    const node = this;
-    node.controller = RED.nodes.getNode(config.token) as ConnectNode | null;
-    node.stationId = config.station_id;
-    node.sheduler = config.sheduler;
-    node.network = config.network;
-    node.fixedAddress = config.fixedAddress;
-    node.fixedPort = config.fixedPort;
-    node.networkMode = node.network ? node.network.mode || 'auto' : 'auto';
-    node.connectionFlag = config.connectionFlag;
-    node.status({});
 
-    if (node.sheduler) {
-      node.sheduler.forEach((day: any) => {
-        node.debug(JSON.stringify(day));
+    this.controller = RED.nodes.getNode(config.token) as ConnectNode | null;
+    this.stationId = config.station_id;
+    this.sheduler = config.sheduler;
+    this.network = config.network;
+    this.fixedAddress = config.fixedAddress;
+    this.fixedPort = config.fixedPort;
+    this.networkMode = this.network ? this.network.mode || 'auto' : 'auto';
+    this.connectionFlag = config.connectionFlag;
+    this.status({});
+
+    if (this.sheduler) {
+      this.sheduler.forEach((day: any) => {
+        this.debug(JSON.stringify(day));
       });
     }
 
     /** Обновляет визуальный статус ноды в редакторе */
-    node.onStatus = function (data: NodeStatusData): void {
+    this.onStatus = (data: NodeStatusData): void => {
       if (data) {
-        node.status({ fill: data.color, shape: 'dot', text: data.text });
+        this.status({ fill: data.color, shape: 'dot', text: data.text });
       }
     };
 
     /** Обработчик: при готовности нужного устройства регистрирует его в connect-ноде */
-    node.onDeviceReady = function (device: RuntimeDevice): void {
-      if (device.id === node.stationId) {
-        node.registerDevice();
+    this.onDeviceReady = (device: RuntimeDevice): void => {
+      if (device.id === this.stationId) {
+        this.registerDevice();
       }
     };
 
     /** Отправляет запрос на регистрацию устройства с параметрами подключения, расписания и сети */
-    node.registerDevice = function (): void {
-      node.debug(`Send registration for ${node.stationId}`);
+    this.registerDevice = (): void => {
+      this.debug(`Send registration for ${this.stationId}`);
       const params = {
-        connection: node.connectionFlag,
-        sheduler: node.sheduler,
-        network: { mode: node.networkMode, fixedAddress: node.fixedAddress, fixedPort: node.fixedPort }
+        connection: this.connectionFlag,
+        sheduler: this.sheduler,
+        network: { mode: this.networkMode, fixedAddress: this.fixedAddress, fixedPort: this.fixedPort }
       };
-      const status = node.controller.registerDevice(node.stationId, node.id, params);
-      node.registration = status !== 2 && status !== undefined;
+      const status = this.controller.registerDevice(this.stationId, this.id, params);
+      this.registration = status !== 2 && status !== undefined;
     };
 
-    node.on('close', () => {
-      if (node.controller) {
-        node.controller.removeListener('deviceReady', node.onDeviceReady);
-        node.controller.unregisterDevice(node.stationId, node.id);
+    this.on('close', () => {
+      if (this.controller) {
+        this.controller.removeListener('deviceReady', this.onDeviceReady);
+        this.controller.unregisterDevice(this.stationId, this.id);
       }
     });
 
-    if (node.controller) {
-      node.controller.on(`statusUpdate_${node.stationId}`, node.onStatus);
-      node.controller.on('deviceReady', node.onDeviceReady);
-      node.registerDevice();
+    if (this.controller) {
+      this.controller.on(`statusUpdate_${this.stationId}`, this.onStatus);
+      this.controller.on('deviceReady', this.onDeviceReady);
+      this.registerDevice();
     }
   }
 

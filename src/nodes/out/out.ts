@@ -1,5 +1,5 @@
-import { NodeInitializer } from 'node-red';
-import { OutNodeConfig, ConnectNode, NodeStatusData } from '@/lib/types';
+import type { NodeInitializer } from 'node-red';
+import type { ConnectNode, NodeStatusData, OutNodeConfig } from '@/lib/types';
 
 const nodeInit: NodeInitializer = (RED) => {
   /**
@@ -9,83 +9,83 @@ const nodeInit: NodeInitializer = (RED) => {
    */
   function OutNodeConstructor(this: any, config: OutNodeConfig): void {
     RED.nodes.createNode(this, config);
-    const node = this;
-    node.config = config;
-    node.controller = RED.nodes.getNode(config.token) as ConnectNode | null;
 
-    node.input = config.input;
-    node.stationId = config.station_id;
-    node.volumeFlag = config.volumeFlag;
-    node.volume = config.volume;
-    node.stopListening = config.stopListening;
-    node.noTrackPhrase = config.noTrack;
-    node.pauseMusic = config.pauseMusic;
-    node.ttsVoice = config.ttsVoice;
-    node.ttsEffect = config.ttsEffect;
-    node.whisper = config.whisper;
-    node.status({});
+    this.config = config;
+    this.controller = RED.nodes.getNode(config.token) as ConnectNode | null;
 
-    node.debug(node.stationId);
+    this.input = config.input;
+    this.stationId = config.station_id;
+    this.volumeFlag = config.volumeFlag;
+    this.volume = config.volume;
+    this.stopListening = config.stopListening;
+    this.noTrackPhrase = config.noTrack;
+    this.pauseMusic = config.pauseMusic;
+    this.ttsVoice = config.ttsVoice;
+    this.ttsEffect = config.ttsEffect;
+    this.whisper = config.whisper;
+    this.status({});
+
+    this.debug(this.stationId);
 
     /**
      * Обработчик входящего сообщения.
      * Для tts: получает payload из msg/flow/global/str/json, оборачивает в SSML-теги (голос, эффект, шёпот).
      * Для остальных типов: пробрасывает payload и hap напрямую.
      */
-    node.on('input', (input: any) => {
-      node.debug(`input: ${JSON.stringify(input)}`);
+    this.on('input', (input: any) => {
+      this.debug(`input: ${JSON.stringify(input)}`);
 
-      if (node.stationId) {
+      if (this.stationId) {
         const data: any = {};
 
         // apply node's config
-        if (node.volumeFlag) data.volume = node.volume / 100;
-        if (node.whisper) data.whisper = node.whisper;
-        if (node.stopListening) data.stopListening = node.stopListening;
-        if (node.noTrackPhrase) data.noTrackPhrase = node.noTrackPhrase;
-        if (node.pauseMusic) data.pauseMusic = node.pauseMusic;
+        if (this.volumeFlag) data.volume = this.volume / 100;
+        if (this.whisper) data.whisper = this.whisper;
+        if (this.stopListening) data.stopListening = this.stopListening;
+        if (this.noTrackPhrase) data.noTrackPhrase = this.noTrackPhrase;
+        if (this.pauseMusic) data.pauseMusic = this.pauseMusic;
 
         // redefine options from input
         if ('volume' in input) data.volume = input.volume / 100;
         if ('whisper' in input) data.whisper = !!input.whisper;
-        if ('voice' in input) node.ttsVoice = input.voice;
-        if ('effect' in input) node.ttsEffect = input.effect;
+        if ('voice' in input) this.ttsVoice = input.voice;
+        if ('effect' in input) this.ttsEffect = input.effect;
         if ('prevent_listening' in input) data.noTrackPhrase = input.prevent_listening;
         if ('pause_music' in input) data.pauseMusic = input.pause_music;
 
-        if ('tts' === node.input) {
+        if ('tts' === this.input) {
           let payload: any;
-          switch (node.config.payloadType) {
+          switch (this.config.payloadType) {
             case 'flow': {
-              payload = node.context().flow.get(node.config.payload);
+              payload = this.context().flow.get(this.config.payload);
               if (typeof payload === 'undefined') {
-                node.debug(`Empty flow context with key ${node.config.payload}`);
+                this.debug(`Empty flow context with key ${this.config.payload}`);
               }
               break;
             }
             case 'global': {
-              payload = node.context().global.get(node.config.payload);
+              payload = this.context().global.get(this.config.payload);
               if (typeof payload === 'undefined') {
-                node.debug(`Empty global context with key ${node.config.payload}`);
+                this.debug(`Empty global context with key ${this.config.payload}`);
               }
               break;
             }
             case 'str': {
-              payload = node.config.payload;
+              payload = this.config.payload;
               break;
             }
             case 'json': {
               try {
-                const arr = JSON.parse(node.config.payload);
+                const arr = JSON.parse(this.config.payload);
                 payload = arr[(Math.random() * arr.length) | 0];
               } catch (e) {
-                node.debug(`Error on parsing input JSON: ${e}`);
+                this.debug(`Error on parsing input JSON: ${e}`);
               }
               break;
             }
             case 'msg':
             default: {
-              payload = input[node.config.payload];
+              payload = input[this.config.payload];
               break;
             }
           }
@@ -93,11 +93,11 @@ const nodeInit: NodeInitializer = (RED) => {
           if (typeof payload !== 'undefined' && payload !== null) {
             // Coerce non-string payloads (numbers, objects) to string so SSML wrapping is safe.
             data.payload = typeof payload === 'string' ? payload : String(payload);
-            if (node.ttsVoice) {
-              data.payload = `<speaker voice='${node.ttsVoice}'>${data.payload}`;
+            if (this.ttsVoice) {
+              data.payload = `<speaker voice='${this.ttsVoice}'>${data.payload}`;
             }
-            if (node.ttsEffect) {
-              const effectsArr = node.ttsEffect.split(',');
+            if (this.ttsEffect) {
+              const effectsArr = this.ttsEffect.split(',');
               for (const effect of effectsArr) {
                 data.payload = `<speaker effect='${effect}'>${data.payload}`;
               }
@@ -110,39 +110,39 @@ const nodeInit: NodeInitializer = (RED) => {
           }
 
           if (data.payload.length > 0) {
-            node.controller.sendMessage(node.stationId, node.input, data);
-            node.debug(`Sending data: station: ${node.stationId}, input type: ${node.input}, data: ${JSON.stringify(data)}`);
+            this.controller.sendMessage(this.stationId, this.input, data);
+            this.debug(`Sending data: station: ${this.stationId}, input type: ${this.input}, data: ${JSON.stringify(data)}`);
           } else {
-            node.debug('Nothing to send. Check input and parameters');
+            this.debug('Nothing to send. Check input and parameters');
           }
         } else {
           data.payload = input.payload;
           data.hap = input.hap;
-          node.controller.sendMessage(node.stationId, node.input, data);
-          node.debug(`Sending data: station: ${node.stationId}, input type: ${node.input}, data: ${JSON.stringify(data)}`);
+          this.controller.sendMessage(this.stationId, this.input, data);
+          this.debug(`Sending data: station: ${this.stationId}, input type: ${this.input}, data: ${JSON.stringify(data)}`);
         }
       } else {
-        node.debug('node.stationId is empty');
+        this.debug('node.stationId is empty');
       }
     });
 
     /** Обновляет визуальный статус ноды в редакторе */
-    node.onStatus = function (data: NodeStatusData): void {
-      node.debug(`Status: ${JSON.stringify(data)}`);
+    this.onStatus = (data: NodeStatusData): void => {
+      this.debug(`Status: ${JSON.stringify(data)}`);
       if (data) {
-        node.status({ fill: data.color, shape: 'dot', text: data.text });
+        this.status({ fill: data.color, shape: 'dot', text: data.text });
       }
     };
 
-    node.on('close', () => {
-      if (node.controller) {
-        node.controller.removeListener(`statusUpdate_${node.stationId}`, node.onStatus);
+    this.on('close', () => {
+      if (this.controller) {
+        this.controller.removeListener(`statusUpdate_${this.stationId}`, this.onStatus);
       }
     });
 
-    if (node.controller) {
-      node.onStatus(node.controller.getStatus(node.stationId));
-      node.controller.on(`statusUpdate_${node.stationId}`, node.onStatus);
+    if (this.controller) {
+      this.onStatus(this.controller.getStatus(this.stationId));
+      this.controller.on(`statusUpdate_${this.stationId}`, this.onStatus);
     }
   }
 

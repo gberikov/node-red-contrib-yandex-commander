@@ -1,4 +1,4 @@
-import { DeviceParameters, SchedulerDay } from '@/lib/types';
+import type { DeviceParameters, SchedulerDay } from '@/lib/types';
 
 /**
  * Проверяет, разрешено ли воспроизведение в текущее время по расписанию.

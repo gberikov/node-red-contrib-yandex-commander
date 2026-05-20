@@ -1,21 +1,11 @@
-import { NodeInitializer } from 'node-red';
+import type { NodeInitializer } from 'node-red';
 import WebSocket from 'ws';
 import { QuasarApi } from '@/lib/api';
 import { YandexAuth } from '@/lib/auth';
-import {
-  ConnectNode,
-  ConnectNodeConfig,
-  RuntimeDevice,
-  ReadyDevice,
-  NodeStatusData,
-  MessageType,
-  OutMessage,
-  DeviceParameters,
-  RegistrationBufferEntry
-} from './types';
-import { buildWsPayload } from './wsPayload';
+import { applyCloudFallback, discoverDevices } from './discovery';
 import { checkScheduler } from './scheduler';
-import { discoverDevices, applyCloudFallback } from './discovery';
+import type { ConnectNode, ConnectNodeConfig, DeviceParameters, MessageType, NodeStatusData, OutMessage, ReadyDevice, RuntimeDevice } from './types';
+import { buildWsPayload } from './wsPayload';
 
 const nodeInit: NodeInitializer = (RED) => {
   function ConnectNodeConstructor(this: ConnectNode, config: ConnectNodeConfig): void {
@@ -43,7 +33,7 @@ const nodeInit: NodeInitializer = (RED) => {
       if (httpRouteRegistered) return;
       httpRouteRegistered = true;
 
-      RED.httpAdmin.get(`/stations/${node.id}`, RED.auth.needsPermission('yandex-commander-connect.read'), function (_req: any, res: any) {
+      RED.httpAdmin.get(`/stations/${node.id}`, RED.auth.needsPermission('yandex-commander-connect.read'), (_req: any, res: any) => {
         res.json({ devices: httpDevicesData });
       });
     }
@@ -104,7 +94,7 @@ const nodeInit: NodeInitializer = (RED) => {
         processDeviceList(node.deviceList);
 
         try {
-          const mdnsResult = await discoverDevices(node.deviceList, node.debug.bind(node));
+          await discoverDevices(node.deviceList, node.debug.bind(node));
           registerHttpRoute();
         } catch (error) {
           node.debug(`Error while searching: ${error}`);
@@ -147,8 +137,7 @@ const nodeInit: NodeInitializer = (RED) => {
     }
 
     function shouldConnect(device: RuntimeDevice): boolean {
-      return (device.connection === true || typeof device.connection === 'undefined')
-        && node.listenerCount(`statusUpdate_${device.id}`) > 0;
+      return (device.connection === true || typeof device.connection === 'undefined') && node.listenerCount(`statusUpdate_${device.id}`) > 0;
     }
 
     function connect(device: RuntimeDevice): void {
@@ -198,14 +187,12 @@ const nodeInit: NodeInitializer = (RED) => {
         device.playAfterTTS = false;
         device.waitForIdle = false;
         device.watchDog = setTimeout(() => {
-          if (typeof device !== 'undefined' && typeof device.ws !== 'undefined') {
-            device.ws!.close();
-          }
+          device.ws?.close();
         }, 10000);
         device.pingInterval = setInterval(sendKeepAlive, 1500, device);
         node.debug(`${device.id}: Kill connection watchdog`);
-        clearTimeout(device.watchDogConn!);
-        clearTimeout(device.timer!);
+        clearTimeout(device.watchDogConn);
+        clearTimeout(device.timer);
       });
 
       device.ws.on('message', function incoming(data: WebSocket.Data) {
@@ -265,18 +252,18 @@ const nodeInit: NodeInitializer = (RED) => {
           }
         }
 
-        clearTimeout(device.watchDog!);
+        clearTimeout(device.watchDog);
         device.watchDog = setTimeout(() => {
-          device.ws!.close();
+          device.ws?.close();
         }, 10000);
       });
 
       device.ws.on('close', function close(code: number, reason: Buffer) {
         statusUpdate({ color: 'red', text: 'disconnected' }, device);
         device.lastState = {};
-        clearTimeout(device.watchDog!);
-        clearTimeout(device.watchDogConn!);
-        clearInterval(device.pingInterval!);
+        clearTimeout(device.watchDog);
+        clearTimeout(device.watchDogConn);
+        clearInterval(device.pingInterval);
         device.pingInterval = undefined;
         const reasonStr = reason ? reason.toString() : '';
         // Codes that allow immediate reconnect; everything else backs off 60s.
@@ -292,9 +279,7 @@ const nodeInit: NodeInitializer = (RED) => {
 
       device.ws.on('error', function error(data: Error) {
         node.debug(`error: ${data}`);
-        if (typeof device !== 'undefined' && typeof device.ws !== 'undefined') {
-          device.ws!.terminate();
-        }
+        device.ws?.terminate();
       });
     }
 
@@ -315,7 +300,7 @@ const nodeInit: NodeInitializer = (RED) => {
     function sendMessage(this: ConnectNode, deviceId: string, messageType: MessageType, message?: OutMessage): string | undefined {
       try {
         const device = findDeviceById(deviceId);
-        if (device && device.ws) {
+        if (device?.ws) {
           if (device.ws.readyState === 1) {
             const result = buildWsPayload(messageType, message || ({} as OutMessage), device.lastState, node.debug.bind(node));
 
@@ -370,7 +355,7 @@ const nodeInit: NodeInitializer = (RED) => {
 
     function getStatus(this: ConnectNode, id: string): NodeStatusData {
       const device = findDeviceById(id);
-      if (device && device.ws) {
+      if (device?.ws) {
         switch (device.ws.readyState) {
           case 0:
             return { color: 'yellow', text: 'connecting...' };
@@ -466,12 +451,12 @@ const nodeInit: NodeInitializer = (RED) => {
     }
 
     function onClose(): void {
-      clearInterval(node.interval!);
+      clearInterval(node.interval);
       for (const device of node.deviceList) {
-        clearTimeout(device.watchDog!);
-        clearTimeout(device.watchDogConn!);
-        clearTimeout(device.timer!);
-        clearInterval(device.pingInterval!);
+        clearTimeout(device.watchDog);
+        clearTimeout(device.watchDogConn);
+        clearTimeout(device.timer);
+        clearInterval(device.pingInterval);
         if (device.ws) {
           // Remove listeners so the close handler doesn't trigger a reconnect.
           device.ws.removeAllListeners();
@@ -499,8 +484,8 @@ const nodeInit: NodeInitializer = (RED) => {
   }
 
   // Static endpoint: fetch devices on-demand using a provided token (works before deploy)
-  RED.httpAdmin.post('/yandex-commander/devices', RED.auth.needsPermission('yandex-commander-connect.read'), async function (req: any, res: any) {
-    const token = req.body && req.body.token;
+  RED.httpAdmin.post('/yandex-commander/devices', RED.auth.needsPermission('yandex-commander-connect.read'), async (req: any, res: any) => {
+    const token = req.body?.token;
     if (!token) {
       res.status(400).json({ error: 'Token is required' });
       return;
@@ -522,20 +507,18 @@ const nodeInit: NodeInitializer = (RED) => {
   // QR-code authorization endpoints
   const yandexAuth = new YandexAuth();
 
-  RED.httpAdmin.post('/yandex-commander/auth/qr', RED.auth.needsPermission('yandex-commander-connect.read'), async function (_req: any, res: any) {
+  RED.httpAdmin.post('/yandex-commander/auth/qr', RED.auth.needsPermission('yandex-commander-connect.read'), async (_req: any, res: any) => {
     try {
       const result = await yandexAuth.startQR();
       res.json(result);
     } catch (err: any) {
-      const message = err.response
-        ? `${err.message} — ${err.response.status} ${JSON.stringify(err.response.data).substring(0, 200)}`
-        : err.message;
+      const message = err.response ? `${err.message} — ${err.response.status} ${JSON.stringify(err.response.data).substring(0, 200)}` : err.message;
       RED.log.error(`[yandex-commander] QR auth error: ${message}`);
       res.status(500).json({ error: message });
     }
   });
 
-  RED.httpAdmin.post('/yandex-commander/auth/qr/status', RED.auth.needsPermission('yandex-commander-connect.read'), async function (req: any, res: any) {
+  RED.httpAdmin.post('/yandex-commander/auth/qr/status', RED.auth.needsPermission('yandex-commander-connect.read'), async (req: any, res: any) => {
     const { sessionId } = req.body;
     if (!sessionId) {
       res.status(400).json({ error: 'sessionId is required' });

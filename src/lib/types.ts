@@ -159,8 +159,7 @@ export interface ConnectCredentials {
   token: string;
 }
 
-export interface ConnectNodeConfig extends NodeDef {
-}
+export interface ConnectNodeConfig extends NodeDef {}
 
 export interface ConnectNode extends Node<ConnectCredentials> {
   token: string;

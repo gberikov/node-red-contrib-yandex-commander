@@ -1,5 +1,5 @@
 import mDnsSd from 'node-dns-sd';
-import { RuntimeDevice } from '@/lib/types';
+import type { RuntimeDevice } from '@/lib/types';
 
 type DebugFn = (msg: string) => void;
 
@@ -16,16 +16,14 @@ export async function discoverDevices(deviceList: RuntimeDevice[], debug: DebugF
     if (networkConfig && networkConfig.mode !== 'auto') continue;
 
     for (const element of result) {
-      const srvRecord = element.packet.answers.find((el: any) => el.type === 'SRV')
-        || element.packet.additionals.find((el: any) => el.type === 'SRV');
-      const txtRecord = element.packet.answers.find((el: any) => el.type === 'TXT')
-        || element.packet.additionals.find((el: any) => el.type === 'TXT');
+      const srvRecord = element.packet.answers.find((el: any) => el.type === 'SRV') || element.packet.additionals.find((el: any) => el.type === 'SRV');
+      const txtRecord = element.packet.answers.find((el: any) => el.type === 'TXT') || element.packet.additionals.find((el: any) => el.type === 'TXT');
       if (txtRecord && txtRecord.rdata.deviceId === device.id) {
         device.address = element.address;
         device.port = element.service.port;
         try {
           device.host = srvRecord.rdata.target;
-        } catch (e) {
+        } catch {
           debug('Error searching hostname in mDNS answer');
         }
       }

@@ -1,4 +1,4 @@
-import { MessageType, OutMessage, WsPayload, DeviceState } from '@/lib/types';
+import type { DeviceState, MessageType, OutMessage, WsPayload } from '@/lib/types';
 
 type DebugFn = (msg: string) => void;
 
@@ -21,12 +21,7 @@ export interface WsPayloadResult {
  * Чистая функция — не мутирует device, не вызывает sendMessage.
  * Побочные эффекты описываются флагами в результате.
  */
-export function buildWsPayload(
-  messageType: MessageType,
-  message: OutMessage,
-  deviceState: DeviceState | undefined,
-  debug: DebugFn
-): WsPayloadResult {
+export function buildWsPayload(messageType: MessageType, message: OutMessage, deviceState: DeviceState | undefined, debug: DebugFn): WsPayloadResult {
   const commands = ['play', 'stop', 'next', 'prev', 'ping', 'softwareVersion'];
   const extraCommands = ['forward', 'backward', 'volumeup', 'volumedown', 'volume'];
 
@@ -108,10 +103,7 @@ export function buildWsPayload(
       if (message.volume) {
         result.savedVolumeLevel = deviceState?.volume;
         result.waitForIdle = true;
-        result.payloads.push(
-          { command: 'setVolume', volume: parseFloat(String(message.volume)) },
-          ttsPayload
-        );
+        result.payloads.push({ command: 'setVolume', volume: parseFloat(String(message.volume)) }, ttsPayload);
       } else {
         result.payloads.push(ttsPayload);
       }
@@ -197,13 +189,15 @@ export function buildWsPayload(
 
     case 'stopListening':
       return {
-        payloads: [{
-          command: 'serverAction',
-          serverActionEventPayload: {
-            type: 'server_action',
-            name: 'on_suggest'
+        payloads: [
+          {
+            command: 'serverAction',
+            serverActionEventPayload: {
+              type: 'server_action',
+              name: 'on_suggest'
+            }
           }
-        }]
+        ]
       };
   }
 }

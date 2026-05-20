@@ -4,26 +4,26 @@ declare const $: any;
 function fetchDevices(configNodeId: string, callback: (devices: any[]) => void) {
   const config = RED.nodes.node(configNodeId);
   if (!config) return;
-  $.getJSON(`stations/${config.id}`, function (data: any) {
+  $.getJSON(`stations/${config.id}`, (data: any) => {
     if (data.devices && data.devices.length > 0) {
       callback(data.devices);
     } else {
       fetchDevicesByToken(config, callback);
     }
-  }).fail(function () {
+  }).fail(() => {
     fetchDevicesByToken(config, callback);
   });
 }
 
 function fetchDevicesByToken(config: any, callback: (devices: any[]) => void) {
-  const token = (config.credentials && config.credentials.token) || $('#node-config-input-token').val();
+  const token = config.credentials?.token || $('#node-config-input-token').val();
   if (!token) return;
   $.ajax({
     url: 'yandex-commander/devices',
     method: 'POST',
     contentType: 'application/json',
     data: JSON.stringify({ token }),
-    success: function (data: any) {
+    success: (data: any) => {
       if (data.devices) callback(data.devices);
     }
   });
@@ -119,7 +119,7 @@ function onOpen(this: any) {
 
   function loadDevices() {
     selector.empty();
-    fetchDevices($('#node-input-token').val(), function (devices) {
+    fetchDevices($('#node-input-token').val(), (devices) => {
       devices.forEach((device: any) => {
         selector.append(`<option value="${device.id}">${device.name} (${device.id})</option>`);
         $(`#node-input-station_id :contains(${currentId})`).attr('selected', 'selected');
@@ -137,7 +137,7 @@ function onOpen(this: any) {
     $('.command_options').hide();
     $(`.command_options-${$(this).val()}`).show();
 
-    if ($(this).val() == 'tts') {
+    if ($(this).val() === 'tts') {
       if ($('#node-input-volumeFlag').prop('checked')) {
         $('#node-input-volume').show();
         $('#range-label').show();
@@ -146,16 +146,16 @@ function onOpen(this: any) {
   });
 
   $('#node-input-volumeFlag').on('change', function () {
-    if ($('#node-input-input').val() == 'tts' && $(this).prop('checked')) {
+    if ($('#node-input-input').val() === 'tts' && $(this).prop('checked')) {
       $('#node-input-volume').show();
       $('#range-label').show();
-    } else if ($('#node-input-input').val() == 'tts' && !$(this).prop('checked')) {
+    } else if ($('#node-input-input').val() === 'tts' && !$(this).prop('checked')) {
       $('#node-input-volume').hide();
       $('#range-label').hide();
     }
   });
 
-  $('#node-input-volume').on('change', function () {
+  $('#node-input-volume').on('change', () => {
     $('#volume-level').text(`${parseFloat($('#node-input-volume').val() as string)}`);
   });
 }

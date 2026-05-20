@@ -1,6 +1,6 @@
-import { NodeInitializer } from 'node-red';
+import type { NodeInitializer } from 'node-red';
 import { preparePayload as buildPayload } from '@/lib/stationHelper';
-import { GetNodeConfig, ConnectNode, NodeStatusData, DeviceState } from '@/lib/types';
+import type { ConnectNode, DeviceState, GetNodeConfig, NodeStatusData } from '@/lib/types';
 
 const nodeInit: NodeInitializer = (RED) => {
   /**
@@ -28,14 +28,14 @@ const nodeInit: NodeInitializer = (RED) => {
     }
 
     /** Обновляет визуальный статус ноды в редакторе */
-    node.onStatus = function (data: NodeStatusData): void {
+    node.onStatus = (data: NodeStatusData): void => {
       if (data) {
         node.status({ fill: data.color, shape: 'dot', text: data.text });
       }
     };
 
     /** Обработчик входящего сообщения: отдаёт текущее состояние станции или пробрасывает msg */
-    node.onInput = function (msg: any, send: any, done: any): void {
+    node.onInput = (msg: any, _send: any, _done: any): void => {
       node.debug(`current state: ${JSON.stringify(node.lastState)}`);
       if ('aliceState' in node.lastState) {
         node.send(preparePayload(node.lastState, msg));
@@ -45,12 +45,12 @@ const nodeInit: NodeInitializer = (RED) => {
     };
 
     /** Обработчик WS-сообщения: сохраняет последнее состояние устройства */
-    node.onMessage = function (message: DeviceState): void {
+    node.onMessage = (message: DeviceState): void => {
       node.lastState = message;
     };
 
     /** Отписывается от событий контроллера при удалении ноды */
-    node.onClose = function (): void {
+    node.onClose = (): void => {
       if (node.controller) {
         node.controller.removeListener(`message_${node.stationId}`, node.onMessage);
         node.controller.removeListener(`statusUpdate_${node.stationId}`, node.onStatus);

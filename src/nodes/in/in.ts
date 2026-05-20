@@ -1,6 +1,6 @@
-import { NodeInitializer } from 'node-red';
+import type { NodeInitializer } from 'node-red';
 import { preparePayload } from '@/lib/stationHelper';
-import { InNodeConfig, ConnectNode, NodeStatusData, DeviceState } from '@/lib/types';
+import type { ConnectNode, DeviceState, InNodeConfig, NodeStatusData } from '@/lib/types';
 
 const nodeInit: NodeInitializer = (RED) => {
   /**
@@ -35,19 +35,19 @@ const nodeInit: NodeInitializer = (RED) => {
     }
 
     /** Обработчик WS-сообщения: подготавливает payload и отправляет на выход */
-    node.onMessage = function (data: DeviceState): void {
+    node.onMessage = (data: DeviceState): void => {
       sendMessage(preparePayload(node, data));
     };
 
     /** Обновляет визуальный статус ноды в редакторе */
-    node.onStatus = function (data: NodeStatusData): void {
+    node.onStatus = (data: NodeStatusData): void => {
       if (data) {
         node.status({ fill: data.color, shape: 'dot', text: data.text });
       }
     };
 
     /** Отписывается от событий контроллера при удалении ноды */
-    node.onClose = function (): void {
+    node.onClose = (): void => {
       if (node.controller) {
         node.controller.removeListener(`message_${node.stationId}`, node.onMessage);
         node.controller.removeListener(`statusUpdate_${node.stationId}`, node.onStatus);

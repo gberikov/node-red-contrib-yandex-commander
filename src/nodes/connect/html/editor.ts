@@ -1,7 +1,6 @@
-import { EditorNodeProperties, EditorRED } from 'node-red';
+import type { EditorNodeProperties, EditorRED } from 'node-red';
 
-interface ConnectEditorNodeProperties extends EditorNodeProperties {
-}
+interface ConnectEditorNodeProperties extends EditorNodeProperties {}
 
 interface ConnectEditorNodeCredentials {
   token: string;
@@ -18,7 +17,7 @@ RED.nodes.registerType<ConnectEditorNodeProperties, ConnectEditorNodeCredentials
   label: function () {
     return this.name || 'YandexCommanderConnect';
   },
-  oneditprepare: function () {
+  oneditprepare: () => {
     $('#qr-button').on('click', startQRAuth);
   }
 });
