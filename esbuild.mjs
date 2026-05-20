@@ -1,12 +1,11 @@
 import * as esbuild from 'esbuild';
 import { readFileSync, mkdirSync, copyFileSync, readdirSync, statSync, existsSync, writeFileSync } from 'node:fs';
-import { join, dirname, relative, resolve } from 'node:path';
+import { join, dirname } from 'node:path';
 
-const pkg = JSON.parse(readFileSync('./package.json', 'utf8'));
 const nodes = ['connect', 'station', 'get', 'in', 'out'];
 const isWatch = process.argv.includes('--watch');
+const isProd = process.argv.includes('--prod');
 
-/** Find all .ts files in src/, excluding editor.ts files */
 function getRuntimeEntryPoints() {
   const all = [];
   function walk(dir) {
@@ -23,30 +22,6 @@ function getRuntimeEntryPoints() {
   return all;
 }
 
-/** Plugin to rewrite @/* imports to relative paths in source before compilation */
-const aliasPlugin = {
-  name: 'alias-resolver',
-  setup(build) {
-    build.onLoad({ filter: /\.ts$/ }, async (args) => {
-      const source = readFileSync(args.path, 'utf8');
-      if (!source.includes('@/')) return undefined;
-      const fileDir = dirname(args.path);
-      const srcDir = resolve('src');
-      const rewritten = source.replace(
-        /(from\s+['"])@\/([^'"]+)(['"])/g,
-        (_match, prefix, importPath, suffix) => {
-          const abs = resolve(srcDir, importPath);
-          let rel = relative(fileDir, abs).replace(/\\/g, '/');
-          if (!rel.startsWith('.')) rel = './' + rel;
-          return prefix + rel + suffix;
-        }
-      );
-      return { contents: rewritten, loader: 'ts' };
-    });
-  },
-};
-
-// --- Runtime build ---
 async function buildRuntime() {
   const entryPoints = getRuntimeEntryPoints();
   const ctx = await esbuild.context({
@@ -54,9 +29,11 @@ async function buildRuntime() {
     outdir: 'build',
     platform: 'node',
     format: 'cjs',
-    target: 'es2021',
-    sourcemap: true,
-    plugins: [aliasPlugin],
+    target: 'es2022',
+    sourcemap: isProd ? false : 'inline',
+    tsconfig: './tsconfig.json',
+    conditions: ['node'],
+    logLevel: 'info',
   });
   if (isWatch) {
     await ctx.watch();
@@ -68,7 +45,6 @@ async function buildRuntime() {
   }
 }
 
-// --- Editor build (per node) ---
 async function buildEditor(name) {
   const editorDir = `src/nodes/${name}/html`;
   const result = await esbuild.build({
@@ -76,15 +52,14 @@ async function buildEditor(name) {
     bundle: true,
     write: false,
     format: 'iife',
-    target: 'es2015',
-    minify: false,
+    target: 'es2020',
+    minify: isProd,
+    tsconfig: './tsconfig.json',
   });
 
   const js = result.outputFiles[0].text;
-
-  // Collect all .html files from the editor directory
-  const htmlFiles = readdirSync(editorDir).filter(f => f.endsWith('.html'));
-  const htmlContents = htmlFiles.map(f => readFileSync(join(editorDir, f), 'utf8'));
+  const htmlFiles = readdirSync(editorDir).filter((f) => f.endsWith('.html'));
+  const htmlContents = htmlFiles.map((f) => readFileSync(join(editorDir, f), 'utf8'));
 
   const output = `<script type="text/javascript">\n${js}</script>\n${htmlContents.join('\n')}`;
 
@@ -94,7 +69,6 @@ async function buildEditor(name) {
   console.log(`[editor] ${name}.html`);
 }
 
-// --- Copy static files ---
 function cpR(src, dest) {
   if (!existsSync(src)) return;
   const st = statSync(src);
@@ -120,14 +94,13 @@ function copyStatic() {
   console.log('[static] copied');
 }
 
-// --- Main ---
 async function main() {
   await buildRuntime();
-  await Promise.all(nodes.map(n => buildEditor(n)));
+  await Promise.all(nodes.map((n) => buildEditor(n)));
   copyStatic();
 }
 
-main().catch(e => {
+main().catch((e) => {
   console.error(e);
   process.exit(1);
 });

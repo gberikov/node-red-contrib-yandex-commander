@@ -1,5 +1,5 @@
-import axios, { type AxiosResponse } from 'axios';
 import crypto from 'node:crypto';
+import axios, { type AxiosResponse } from 'axios';
 
 interface AuthSession {
   csrfToken: string;
@@ -8,14 +8,15 @@ interface AuthSession {
   createdAt: number;
 }
 
-const UA = 'Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36';
+const UA =
+  'Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36';
 
 const BROWSER_HEADERS = {
   'User-Agent': UA,
-  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+  Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
   'Accept-Language': 'ru-RU,ru;q=0.9,en;q=0.5',
   'Accept-Encoding': 'gzip, deflate, br',
-  'Connection': 'keep-alive',
+  Connection: 'keep-alive',
   'Sec-Fetch-Dest': 'document',
   'Sec-Fetch-Mode': 'navigate',
   'Sec-Fetch-Site': 'none',
@@ -28,12 +29,12 @@ function mergeCookies(existing: string[], setCookieHeaders: string | string[] | 
   const headers = Array.isArray(setCookieHeaders) ? setCookieHeaders : [setCookieHeaders];
   const map = new Map<string, string>();
   for (const c of existing) {
-    const name = c.split('=')[0];
+    const name = c.split('=')[0] ?? '';
     map.set(name, c);
   }
   for (const raw of headers) {
-    const pair = raw.split(';')[0];
-    const name = pair.split('=')[0];
+    const pair = raw.split(';')[0] ?? '';
+    const name = pair.split('=')[0] ?? '';
     map.set(name, pair);
   }
   return Array.from(map.values());
@@ -93,8 +94,8 @@ export class YandexAuth {
           }
           throw new Error(
             'Яндекс требует прохождение капчи. Попробуйте повторить через 1-2 минуты. ' +
-            'Если ошибка повторяется — откройте passport.yandex.ru в браузере на этом же сервере, ' +
-            'пройдите капчу вручную, затем повторите попытку.'
+              'Если ошибка повторяется — откройте passport.yandex.ru в браузере на этом же сервере, ' +
+              'пройдите капчу вручную, затем повторите попытку.',
           );
         }
         throw err;
@@ -122,7 +123,7 @@ export class YandexAuth {
       amHtml.match(/name="csrf_token"[^>]*value="([^"]+)"/) ||
       amHtml.match(/value="([^"]+)"[^>]*name="csrf_token"/) ||
       amHtml.match(/"csrf_token"\s*:\s*"([^"]+)"/);
-    if (!csrfMatch) {
+    if (!csrfMatch || !csrfMatch[1]) {
       throw new Error('Failed to parse csrf_token from auth page');
     }
     const csrfToken = csrfMatch[1];
@@ -141,8 +142,8 @@ export class YandexAuth {
           ...BROWSER_HEADERS,
           'Content-Type': 'application/x-www-form-urlencoded',
           'X-Requested-With': 'XMLHttpRequest',
-          'Origin': 'https://passport.yandex.ru',
-          'Referer': 'https://passport.yandex.ru/am?app_platform=android',
+          Origin: 'https://passport.yandex.ru',
+          Referer: 'https://passport.yandex.ru/am?app_platform=android',
           Cookie: cookieHeader(cookies),
         },
         maxRedirects: 0,

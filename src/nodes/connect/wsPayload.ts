@@ -1,4 +1,4 @@
-import { MessageType, OutMessage, WsPayload, DeviceState } from '@/lib/types';
+import type { DeviceState, MessageType, OutMessage, WsPayload } from '@/lib/types';
 
 type DebugFn = (msg: string) => void;
 
@@ -25,7 +25,7 @@ export function buildWsPayload(
   messageType: MessageType,
   message: OutMessage,
   deviceState: DeviceState | undefined,
-  debug: DebugFn
+  debug: DebugFn,
 ): WsPayloadResult {
   const commands = ['play', 'stop', 'next', 'prev', 'ping', 'softwareVersion'];
   const extraCommands = ['forward', 'backward', 'volumeup', 'volumedown', 'volume'];
@@ -98,20 +98,17 @@ export function buildWsPayload(
           payload: {
             form_update: {
               name: 'personal_assistant.scenarios.repeat_after_me',
-              slots: [{ type: 'string', name: 'request', value: message.payload }]
+              slots: [{ type: 'string', name: 'request', value: message.payload }],
             },
-            resubmit: true
-          }
-        }
+            resubmit: true,
+          },
+        },
       };
 
       if (message.volume) {
         result.savedVolumeLevel = deviceState?.volume;
         result.waitForIdle = true;
-        result.payloads.push(
-          { command: 'setVolume', volume: parseFloat(String(message.volume)) },
-          ttsPayload
-        );
+        result.payloads.push({ command: 'setVolume', volume: parseFloat(String(message.volume)) }, ttsPayload);
       } else {
         result.payloads.push(ttsPayload);
       }
@@ -138,7 +135,12 @@ export function buildWsPayload(
         if ('TargetMediaState' in message.payload) {
           const TargetMediaState = message.payload.TargetMediaState;
           if (id) {
-            return buildWsPayload('command', { payload: TargetMediaState ? 'stop' : 'play' } as OutMessage, deviceState, debug);
+            return buildWsPayload(
+              'command',
+              { payload: TargetMediaState ? 'stop' : 'play' } as OutMessage,
+              deviceState,
+              debug,
+            );
           } else if (!id && !TargetMediaState && noTrackPhrase) {
             return buildWsPayload('voice', { payload: noTrackPhrase } as OutMessage, deviceState, debug);
           }
@@ -180,7 +182,12 @@ export function buildWsPayload(
         // tv + VolumeSelector
         if ('VolumeSelector' in message.payload) {
           const VolumeSelector = message.payload.VolumeSelector;
-          return buildWsPayload('command', { payload: VolumeSelector ? 'volumedown' : 'volumeup' } as OutMessage, deviceState, debug);
+          return buildWsPayload(
+            'command',
+            { payload: VolumeSelector ? 'volumedown' : 'volumeup' } as OutMessage,
+            deviceState,
+            debug,
+          );
         }
 
         debug('unknown command');
@@ -197,13 +204,15 @@ export function buildWsPayload(
 
     case 'stopListening':
       return {
-        payloads: [{
-          command: 'serverAction',
-          serverActionEventPayload: {
-            type: 'server_action',
-            name: 'on_suggest'
-          }
-        }]
+        payloads: [
+          {
+            command: 'serverAction',
+            serverActionEventPayload: {
+              type: 'server_action',
+              name: 'on_suggest',
+            },
+          },
+        ],
       };
   }
 }

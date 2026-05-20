@@ -17,8 +17,8 @@ export class QuasarApi {
       responseType: 'json',
       headers: {
         'Content-type': 'application/json',
-        Authorization: `OAuth ${token}`
-      }
+        Authorization: `OAuth ${token}`,
+      },
     });
   }
 

@@ -2,23 +2,23 @@
   "compilerOptions": {
     "outDir": "./build",
     "rootDir": "./src",
-    "target": "ES2021",
-    "module": "CommonJS",
-    "lib": ["ES2021"],
-    "moduleResolution": "node10",
+    "target": "ES2022",
+    "module": "NodeNext",
+    "lib": ["ES2022"],
+    "moduleResolution": "NodeNext",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "strict": false,
+    "isolatedModules": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
     "noFallthroughCasesInSwitch": true,
     "preserveConstEnums": true,
     "preserveWatchOutput": true,
-    "typeRoots": ["./node_modules/@types"],
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src/**/*"],

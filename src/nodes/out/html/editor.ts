@@ -4,28 +4,28 @@ declare const $: any;
 function fetchDevices(configNodeId: string, callback: (devices: any[]) => void) {
   const config = RED.nodes.node(configNodeId);
   if (!config) return;
-  $.getJSON(`stations/${config.id}`, function (data: any) {
+  $.getJSON(`stations/${config.id}`, (data: any) => {
     if (data.devices && data.devices.length > 0) {
       callback(data.devices);
     } else {
       fetchDevicesByToken(config, callback);
     }
-  }).fail(function () {
+  }).fail(() => {
     fetchDevicesByToken(config, callback);
   });
 }
 
 function fetchDevicesByToken(config: any, callback: (devices: any[]) => void) {
-  const token = (config.credentials && config.credentials.token) || $('#node-config-input-token').val();
+  const token = config.credentials?.token || $('#node-config-input-token').val();
   if (!token) return;
   $.ajax({
     url: 'yandex-commander/devices',
     method: 'POST',
     contentType: 'application/json',
     data: JSON.stringify({ token }),
-    success: function (data: any) {
+    success: (data: any) => {
       if (data.devices) callback(data.devices);
-    }
+    },
   });
 }
 
@@ -36,42 +36,42 @@ RED.nodes.registerType('yandex-commander-out', {
     name: { value: '' },
     token: {
       type: 'yandex-commander-connect',
-      required: true
+      required: true,
     },
     station_id: {
-      required: true
+      required: true,
     },
     input: {
       value: 'command',
-      required: true
+      required: true,
     },
     payload: {
-      value: 'payload'
+      value: 'payload',
     },
     payloadType: {
-      value: 'msg'
+      value: 'msg',
     },
     volume: {},
     volumeFlag: {
-      value: false
+      value: false,
     },
     stopListening: {
-      value: true
+      value: true,
     },
     pauseMusic: {
-      value: false
+      value: false,
     },
     noTrack: {},
     whisper: {
-      value: false
+      value: false,
     },
     ttsVoice: {
-      value: null
+      value: null,
     },
     ttsEffect: {
       value: null,
-      required: false
-    }
+      required: false,
+    },
   },
   inputs: 1,
   outputs: 0,
@@ -80,7 +80,7 @@ RED.nodes.registerType('yandex-commander-out', {
     return this.name || this.station_id;
   },
   paletteLabel: 'yandex out',
-  oneditprepare: onOpen
+  oneditprepare: onOpen,
 });
 
 /** Инициализация редактора: настраивает typedInput для payload/effect, загружает устройства, управляет видимостью секций */
@@ -91,7 +91,7 @@ function onOpen(this: any) {
     types: ['msg', 'str', 'flow', 'global', 'json'],
     default: 'msg',
     value: 'payload',
-    typeField: $('#node-input-payloadType')
+    typeField: $('#node-input-payloadType'),
   });
 
   $('#node-input-ttsEffect').typedInput({
@@ -102,16 +102,31 @@ function onOpen(this: any) {
         multiple: false,
         options: [
           { value: '', label: RED._('node-red-contrib-yandex-commander/yandex-commander-out:effect.none') },
-          { value: 'behind_the_wall', label: RED._('node-red-contrib-yandex-commander/yandex-commander-out:effect.behind_the_wall') },
+          {
+            value: 'behind_the_wall',
+            label: RED._('node-red-contrib-yandex-commander/yandex-commander-out:effect.behind_the_wall'),
+          },
           { value: 'hamster', label: RED._('node-red-contrib-yandex-commander/yandex-commander-out:effect.hamster') },
-          { value: 'megaphone', label: RED._('node-red-contrib-yandex-commander/yandex-commander-out:effect.megaphone') },
-          { value: 'pitch_down', label: RED._('node-red-contrib-yandex-commander/yandex-commander-out:effect.pitch_down') },
-          { value: 'psychodelic', label: RED._('node-red-contrib-yandex-commander/yandex-commander-out:effect.psychodelic') },
+          {
+            value: 'megaphone',
+            label: RED._('node-red-contrib-yandex-commander/yandex-commander-out:effect.megaphone'),
+          },
+          {
+            value: 'pitch_down',
+            label: RED._('node-red-contrib-yandex-commander/yandex-commander-out:effect.pitch_down'),
+          },
+          {
+            value: 'psychodelic',
+            label: RED._('node-red-contrib-yandex-commander/yandex-commander-out:effect.psychodelic'),
+          },
           { value: 'pulse', label: RED._('node-red-contrib-yandex-commander/yandex-commander-out:effect.pulse') },
-          { value: 'train_announce', label: RED._('node-red-contrib-yandex-commander/yandex-commander-out:effect.train_announce') }
-        ]
-      }
-    ]
+          {
+            value: 'train_announce',
+            label: RED._('node-red-contrib-yandex-commander/yandex-commander-out:effect.train_announce'),
+          },
+        ],
+      },
+    ],
   });
 
   const selector = $('#node-input-station_id');
@@ -119,7 +134,7 @@ function onOpen(this: any) {
 
   function loadDevices() {
     selector.empty();
-    fetchDevices($('#node-input-token').val(), function (devices) {
+    fetchDevices($('#node-input-token').val(), (devices) => {
       devices.forEach((device: any) => {
         selector.append(`<option value="${device.id}">${device.name} (${device.id})</option>`);
         $(`#node-input-station_id :contains(${currentId})`).attr('selected', 'selected');
@@ -137,7 +152,7 @@ function onOpen(this: any) {
     $('.command_options').hide();
     $(`.command_options-${$(this).val()}`).show();
 
-    if ($(this).val() == 'tts') {
+    if ($(this).val() === 'tts') {
       if ($('#node-input-volumeFlag').prop('checked')) {
         $('#node-input-volume').show();
         $('#range-label').show();
@@ -146,16 +161,16 @@ function onOpen(this: any) {
   });
 
   $('#node-input-volumeFlag').on('change', function () {
-    if ($('#node-input-input').val() == 'tts' && $(this).prop('checked')) {
+    if ($('#node-input-input').val() === 'tts' && $(this).prop('checked')) {
       $('#node-input-volume').show();
       $('#range-label').show();
-    } else if ($('#node-input-input').val() == 'tts' && !$(this).prop('checked')) {
+    } else if ($('#node-input-input').val() === 'tts' && !$(this).prop('checked')) {
       $('#node-input-volume').hide();
       $('#range-label').hide();
     }
   });
 
-  $('#node-input-volume').on('change', function () {
+  $('#node-input-volume').on('change', () => {
     $('#volume-level').text(`${parseFloat($('#node-input-volume').val() as string)}`);
   });
 }

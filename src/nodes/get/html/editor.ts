@@ -4,28 +4,28 @@ declare const $: any;
 function fetchDevices(configNodeId: string, callback: (devices: any[]) => void) {
   const config = RED.nodes.node(configNodeId);
   if (!config) return;
-  $.getJSON(`stations/${config.id}`, function (data: any) {
+  $.getJSON(`stations/${config.id}`, (data: any) => {
     if (data.devices && data.devices.length > 0) {
       callback(data.devices);
     } else {
       fetchDevicesByToken(config, callback);
     }
-  }).fail(function () {
+  }).fail(() => {
     fetchDevicesByToken(config, callback);
   });
 }
 
 function fetchDevicesByToken(config: any, callback: (devices: any[]) => void) {
-  const token = (config.credentials && config.credentials.token) || $('#node-config-input-token').val();
+  const token = config.credentials?.token || $('#node-config-input-token').val();
   if (!token) return;
   $.ajax({
     url: 'yandex-commander/devices',
     method: 'POST',
     contentType: 'application/json',
     data: JSON.stringify({ token }),
-    success: function (data: any) {
+    success: (data: any) => {
       if (data.devices) callback(data.devices);
-    }
+    },
   });
 }
 
@@ -36,17 +36,17 @@ RED.nodes.registerType('yandex-commander-get', {
     name: { value: '' },
     token: {
       type: 'yandex-commander-connect',
-      required: true
+      required: true,
     },
     station_id: {
-      required: true
+      required: true,
     },
     output: {
-      required: true
+      required: true,
     },
     homekitFormat: {
-      value: 'speaker'
-    }
+      value: 'speaker',
+    },
   },
   inputs: 1,
   outputs: 1,
@@ -62,7 +62,7 @@ RED.nodes.registerType('yandex-commander-get', {
 
     function loadDevices() {
       selector.empty();
-      fetchDevices($('#node-input-token').val(), function (devices) {
+      fetchDevices($('#node-input-token').val(), (devices) => {
         devices.forEach((device: any) => {
           selector.append(`<option value="${device.id}">${device.name} (${device.id})</option>`);
           $(`#node-input-station_id :contains(${currentId})`).attr('selected', 'selected');
@@ -74,11 +74,11 @@ RED.nodes.registerType('yandex-commander-get', {
     $('#node-input-token').on('change', loadDevices);
 
     $('#node-input-output').on('change', function () {
-      if ($(this).val() == 'homekit') {
+      if ($(this).val() === 'homekit') {
         $('#node-homekitFormat').show();
       } else {
         $('#node-homekitFormat').hide();
       }
     });
-  }
+  },
 });

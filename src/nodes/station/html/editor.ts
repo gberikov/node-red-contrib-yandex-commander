@@ -8,45 +8,47 @@ RED.nodes.registerType('yandex-commander-station', {
     name: { value: '' },
     token: {
       type: 'yandex-commander-connect',
-      required: true
+      required: true,
     },
     station_id: {
-      required: true
+      required: true,
     },
     connectionFlag: {
-      value: true
+      value: true,
     },
     sheduler: {
-      value: []
+      value: [],
     },
     network: {
-      value: {}
+      value: {},
     },
     fixedAddress: {
       validate: function (this: any, address: string) {
-        if (!this.network.hasOwnProperty('mode')) {
+        if (!Object.hasOwn(this.network, 'mode')) {
           return true;
-        } else if (this.network.mode == 'auto') {
+        } else if (this.network.mode === 'auto') {
           return true;
-        } else if (this.network.mode == 'manual') {
-          return !!address.match(/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/);
+        } else if (this.network.mode === 'manual') {
+          return !!address.match(
+            /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,
+          );
         }
-      }
+      },
     },
     fixedPort: {
       validate: function (this: any, port: string) {
-        if (!this.network.hasOwnProperty('mode')) {
+        if (!Object.hasOwn(this.network, 'mode')) {
           return true;
-        } else if (this.network.mode == 'auto') {
+        } else if (this.network.mode === 'auto') {
           return true;
-        } else if (this.network.mode == 'manual') {
+        } else if (this.network.mode === 'manual') {
           return !!Number(port);
         }
-      }
+      },
     },
     phrase: {
-      value: ''
-    }
+      value: '',
+    },
   },
   inputs: 0,
   outputs: 0,
@@ -56,53 +58,59 @@ RED.nodes.registerType('yandex-commander-station', {
   },
   paletteLabel: 'Station',
   oneditprepare: onOpen,
-  oneditsave: onSave
+  oneditsave: onSave,
 });
 
 /** Получает список устройств: сначала пробует per-node endpoint, при неудаче — статический POST */
 function fetchDevices(configNodeId: string, callback: (devices: any[]) => void) {
   const config = RED.nodes.node(configNodeId);
   if (!config) return;
-  $.getJSON(`stations/${config.id}`, function (data: any) {
+  $.getJSON(`stations/${config.id}`, (data: any) => {
     if (data.devices && data.devices.length > 0) {
       callback(data.devices);
     } else {
       fetchDevicesByToken(config, callback);
     }
-  }).fail(function () {
+  }).fail(() => {
     fetchDevicesByToken(config, callback);
   });
 }
 
 function fetchDevicesByToken(config: any, callback: (devices: any[]) => void) {
-  const token = (config.credentials && config.credentials.token) || $('#node-config-input-token').val();
+  const token = config.credentials?.token || $('#node-config-input-token').val();
   if (!token) return;
   $.ajax({
     url: 'yandex-commander/devices',
     method: 'POST',
     contentType: 'application/json',
     data: JSON.stringify({ token }),
-    success: function (data: any) {
+    success: (data: any) => {
       if (data.devices) callback(data.devices);
-    }
+    },
   });
 }
 
-/** Обновляет выпадающий список станций из API connect-ноды */
-function onRefresh() {
+/**
+ * Обновляет выпадающий список станций из API connect-ноды.
+ * Привязана к window, чтобы HTML-атрибут onclick="onRefresh()" нашёл функцию
+ * после IIFE-бандлинга esbuild'ом.
+ */
+(window as any).onRefresh = function onRefresh() {
   const selector = $('#node-input-station_id');
   const currentId = selector.data('station_id');
 
   selector.empty();
-  fetchDevices($('#node-input-token').val(), function (devices) {
+  fetchDevices($('#node-input-token').val(), (devices: any[]) => {
     devices.forEach((device: any) => {
       selector.append(`<option value="${device.id}">${device.name} (${device.id})</option>`);
       $(`#node-input-station_id option[value=${currentId}]`).attr('selected', true);
-      currentId == device.id && device.address ? $('#node-input-fixedAddress').attr('placeholder', device.address) : $('#node-input-fixedAddress').attr('placeholder', '0.0.0.0');
-      currentId == device.id && device.port ? $('#node-input-fixedPort').attr('placeholder', device.port) : $('#node-input-fixedPort').attr('placeholder', '1961');
+      const addrPlaceholder = currentId === device.id && device.address ? device.address : '0.0.0.0';
+      const portPlaceholder = currentId === device.id && device.port ? device.port : '1961';
+      $('#node-input-fixedAddress').attr('placeholder', addrPlaceholder);
+      $('#node-input-fixedPort').attr('placeholder', portPlaceholder);
     });
   });
-}
+};
 
 /** Инициализация редактора: загружает список станций, заполняет расписание и сетевые настройки */
 function onOpen(this: any) {
@@ -114,12 +122,16 @@ function onOpen(this: any) {
 
   function loadDevices() {
     selector.empty();
-    fetchDevices($('#node-input-token').val(), function (devices) {
+    fetchDevices($('#node-input-token').val(), (devices) => {
       devices.forEach((device: any) => {
         selector.append(`<option value="${device.id}">${device.name} (${device.id})</option>`);
         $(`#node-input-station_id :contains(${currentId})`).attr('selected', true);
-        currentId == device.id && device.address ? $('#node-input-fixedAddress').attr('placeholder', device.address) : $('#node-input-fixedAddress').attr('placeholder', '0.0.0.0');
-        currentId == device.id && device.port ? $('#node-input-fixedPort').attr('placeholder', device.port) : $('#node-input-fixedPort').attr('placeholder', '1961');
+        currentId === device.id && device.address
+          ? $('#node-input-fixedAddress').attr('placeholder', device.address)
+          : $('#node-input-fixedAddress').attr('placeholder', '0.0.0.0');
+        currentId === device.id && device.port
+          ? $('#node-input-fixedPort').attr('placeholder', device.port)
+          : $('#node-input-fixedPort').attr('placeholder', '1961');
       });
     });
   }
@@ -128,11 +140,11 @@ function onOpen(this: any) {
 
   $('#node-input-token').on('change', loadDevices);
 
-  $('#node-input-station_id').on('change', function () {
+  $('#node-input-station_id').on('change', () => {
     const selectedId = $('#node-input-station_id').val();
     if (selectedId) {
-      fetchDevices($('#node-input-token').val(), function (devices) {
-        const device = devices.find((dev: any) => dev.id == selectedId);
+      fetchDevices($('#node-input-token').val(), (devices) => {
+        const device = devices.find((dev: any) => dev.id === selectedId);
         if (device) {
           $('#node-input-fixedAddress').attr('placeholder', device.address || '0.0.0.0');
           $('#node-input-fixedPort').attr('placeholder', device.port || '1961');
@@ -153,7 +165,8 @@ function onOpen(this: any) {
   const sheduler = this.sheduler || [];
 
   $('.sheduler-block').each(function (this: any, i: number, block: any) {
-    const currentDaySchedule = i == 6 ? sheduler.find((el: any) => el.dayNumber == 0) : sheduler.find((el: any) => el.dayNumber == i + 1);
+    const currentDaySchedule =
+      i === 6 ? sheduler.find((el: any) => el.dayNumber === 0) : sheduler.find((el: any) => el.dayNumber === i + 1);
     const activeFlag = !currentDaySchedule ? true : currentDaySchedule.active;
     const startTime = !currentDaySchedule ? '0' : currentDaySchedule.from;
     const endTime = !currentDaySchedule ? '1440' : currentDaySchedule.to;
@@ -161,7 +174,7 @@ function onOpen(this: any) {
     const fromSelect = $(block).children('select').first();
     const toSelect = $(block).children('select').last();
     $(checkbox).prop('checked', activeFlag);
-    $.each(times, function (key: string, value: string) {
+    $.each(times, (key: string, value: string) => {
       $(fromSelect).append(`<option value="${key}">${value}</option>`);
       $(toSelect).append(`<option value="${key}">${value}</option>`);
     });
@@ -177,7 +190,7 @@ function onOpen(this: any) {
       $(fromSelect).prop('disabled', true);
       $(toSelect).prop('disabled', true);
     }
-    $(checkbox).on('change', function () {
+    $(checkbox).on('change', () => {
       if (checkbox.prop('checked')) {
         $(fromSelect).prop('disabled', false);
         $(toSelect).prop('disabled', false);
@@ -194,14 +207,14 @@ function onOpen(this: any) {
   });
 
   const currentStatus = this.connectionFlag;
-  if (currentStatus == true || typeof currentStatus == 'undefined') {
+  if (currentStatus === true || typeof currentStatus === 'undefined') {
     $('#buttonEnabled').addClass('selected');
   } else {
     $('#buttonDisabled').addClass('selected');
   }
 
   const currentMode = this.network ? this.network.mode : 'auto';
-  if (currentMode == 'auto' || typeof currentMode == 'undefined') {
+  if (currentMode === 'auto' || typeof currentMode === 'undefined') {
     $('#autoButton').addClass('selected');
     $('#address-block').hide();
   } else {
@@ -213,14 +226,14 @@ function onOpen(this: any) {
     $('.ip-button-group').removeClass('selected');
     $(this).addClass('selected');
     const pressedButtonId = $(this).attr('id');
-    if (pressedButtonId == 'autoButton') {
+    if (pressedButtonId === 'autoButton') {
       $('#address-block').hide();
-    } else if (pressedButtonId == 'manualButton') {
+    } else if (pressedButtonId === 'manualButton') {
       $('#address-block').show();
       const selectedId = $('#node-input-station_id').val();
       if (selectedId && config) {
-        $.getJSON(`yandexdevices_${config.id}`, function (data: any) {
-          const device = data.devices.find((dev: any) => dev.id == selectedId);
+        $.getJSON(`yandexdevices_${config.id}`, (data: any) => {
+          const device = data.devices.find((dev: any) => dev.id === selectedId);
           $('#node-input-fixedAddress').attr('placeholder', device.address);
           $('#node-input-fixedPort').attr('placeholder', device.port);
         });
@@ -245,22 +258,14 @@ function onSave(this: any) {
     scheduleDay.from = startTime;
     scheduleDay.to = endTime;
     scheduleDay.phrase = phrase;
-    i == 6 ? (scheduleDay.dayNumber = 0) : (scheduleDay.dayNumber = i + 1);
+    scheduleDay.dayNumber = i === 6 ? 0 : i + 1;
     sheduler.push(scheduleDay);
   });
   this.sheduler = sheduler;
 
-  const network: any = {};
-  if ($('#autoButton').hasClass('selected')) {
-    network.mode = 'auto';
-    network.address = '0.0.0.0';
-    network.port = 1961;
-  } else {
-    network.mode = 'manual';
-    network.address = $('#node-input-fixedAddress').val();
-    network.port = $('#node-input-fixedPort').val();
-  }
-  this.network = network;
+  // Network mode is consumed by the runtime via the top-level `fixedAddress`/`fixedPort`
+  // fields (see station.ts:49). The `network` config holds only the mode flag.
+  this.network = { mode: $('#autoButton').hasClass('selected') ? 'auto' : 'manual' };
 
   if ($('#buttonEnabled').hasClass('selected')) {
     this.connectionFlag = true;
