@@ -160,6 +160,10 @@ export interface OutMessage {
   id?: string;
   /** Тип контента для playMusic. */
   type?: PlayMusicType;
+  /** Per-message override: true forces cloud TTS, false forbids cloud, undefined defers to cloudFallback. */
+  cloud?: boolean;
+  /** Internal: OUT-node "Cloud TTS fallback" checkbox value, threaded into sendMessage. */
+  cloudFallback?: boolean;
 }
 
 // ── Connect Node Interfaces ──
@@ -187,7 +191,7 @@ type EventListener = (...args: any[]) => void;
 export interface ConnectNode extends Node<ConnectCredentials> {
   token: string;
   getStatus: (id: string) => NodeStatusData;
-  sendMessage: (deviceId: string, messageType: MessageType, message?: OutMessage) => string | undefined;
+  sendMessage: (deviceId: string, messageType: MessageType, message?: OutMessage) => Promise<string | undefined>;
   registerDevice: (deviceId: string, nodeId: string, parameters: DeviceParameters) => number | undefined;
   unregisterDevice: (deviceId: string, nodeId: string) => number | undefined;
   on(event: string | symbol, listener: EventListener): this;
@@ -245,4 +249,6 @@ export interface OutNodeConfig extends NodeDef {
   musicId: string;
   /** Тип контента для команды Play Music. */
   musicType: PlayMusicType;
+  /** Use cloud Quasar TTS when the local WebSocket is unavailable. Default false. */
+  cloudFallback: boolean;
 }
