@@ -148,7 +148,7 @@ cyr:    о а б в г д е ж з и й к л м н п
 prefix: "ЯC "
 ```
 
-E.g. `device_id = "abc123"` → `"ЯC йклабав"` (hex digit-by-digit).
+E.g. `device_id = "abc123"` → `"ЯC йклабв"` (hex digit-by-digit).
 Locked by unit tests so we don't desync from AlexxIT-created scenarios.
 
 ### `stripSsml` rules

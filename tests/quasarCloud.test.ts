@@ -269,4 +269,35 @@ describe('QuasarCloud.sendCloudTts caching and retry', () => {
     await expect(cloud.sendCloudTts('abc123', 'Привет')).rejects.toThrow(/HTTP 403/);
     expect(stub.calls).toHaveLength(6);
   });
+
+  it('invalidateScenario forces a re-list+adopt on the next call', async () => {
+    // First call: full uncached flow → caches sc-1.
+    stub.responses.push({ data: { status: 'ok', token: 'csrf-1' } });
+    stub.responses.push({ data: { scenarios: [] } });
+    stub.responses.push({ data: { scenario_id: 'sc-1' } });
+    stub.responses.push({ data: { status: 'ok' } });
+    stub.responses.push({ data: { status: 'ok' } });
+    // Second call after invalidation: scenario cache miss → list (returns sc-1 by name) → PUT + POST.
+    stub.responses.push({
+      data: {
+        scenarios: [{ id: 'sc-1', name: encodeDeviceId('abc123') }],
+      },
+    });
+    stub.responses.push({ data: { status: 'ok' } });
+    stub.responses.push({ data: { status: 'ok' } });
+
+    const cloud = new QuasarCloud('oauth-token', () => {});
+    await cloud.sendCloudTts('abc123', 'Один');
+
+    cloud.invalidateScenario('abc123');
+
+    await cloud.sendCloudTts('abc123', 'Два');
+
+    // 5 from first call + 3 from second (list, PUT, POST actions).
+    expect(stub.calls).toHaveLength(8);
+    expect(stub.calls[5].method).toBe('GET');
+    expect(stub.calls[5].url).toBe('/m/v3/user/scenarios');
+    expect(stub.calls[6].method).toBe('PUT');
+    expect(stub.calls[6].url).toBe('/m/v3/user/scenarios/sc-1');
+  });
 });

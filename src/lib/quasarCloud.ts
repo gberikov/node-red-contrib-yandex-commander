@@ -1,3 +1,5 @@
+import axios, { type AxiosInstance } from 'axios';
+
 const HEX_TO_CYR: Record<string, string> = {
   '0': 'о',
   '1': 'а',
@@ -48,8 +50,6 @@ export function stripSsml(input: string, debug: (msg: string) => void): StripRes
   }
   return { text, truncated };
 }
-
-import axios, { type AxiosInstance } from 'axios';
 
 const BASE_URL = 'https://iot.quasar.yandex.ru';
 
