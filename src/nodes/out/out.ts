@@ -16,6 +16,7 @@ interface OutNodeRuntime extends Node<NodeDef> {
   whisper: boolean;
   musicId: string;
   musicType: string;
+  cloudFallback: boolean;
   onStatus: (data: NodeStatusData) => void;
 }
 
@@ -29,6 +30,7 @@ interface OutInputMessage extends NodeMessageInFlow {
   hap?: { session?: unknown };
   id?: string;
   type?: string;
+  cloud?: boolean;
   [key: string]: unknown;
 }
 
@@ -56,6 +58,7 @@ const nodeInit: NodeInitializer = (RED) => {
     this.whisper = config.whisper;
     this.musicId = config.musicId;
     this.musicType = config.musicType;
+    this.cloudFallback = !!config.cloudFallback;
     this.status({});
 
     this.debug(this.stationId);
@@ -65,7 +68,7 @@ const nodeInit: NodeInitializer = (RED) => {
      * Для tts: получает payload из msg/flow/global/str/json, оборачивает в SSML-теги (голос, эффект, шёпот).
      * Для остальных типов: пробрасывает payload и hap напрямую.
      */
-    this.on('input', (input: OutInputMessage) => {
+    this.on('input', async (input: OutInputMessage) => {
       this.debug(`input: ${JSON.stringify(input)}`);
 
       if (this.stationId) {
@@ -144,11 +147,18 @@ const nodeInit: NodeInitializer = (RED) => {
           }
           data.payload = textPayload;
 
+          if (this.cloudFallback) data.cloudFallback = true;
+          if ('cloud' in input) data.cloud = !!input.cloud;
+
           if (textPayload.length > 0 && this.controller) {
-            this.controller.sendMessage(this.stationId, this.input, data);
-            this.debug(
-              `Sending data: station: ${this.stationId}, input type: ${this.input}, data: ${JSON.stringify(data)}`,
-            );
+            try {
+              const result = await this.controller.sendMessage(this.stationId, this.input, data);
+              this.debug(
+                `Sending data: station: ${this.stationId}, input type: ${this.input}, data: ${JSON.stringify(data)}, result: ${result}`,
+              );
+            } catch (err) {
+              this.error(`sendMessage failed: ${err instanceof Error ? err.message : String(err)}`);
+            }
           } else {
             this.debug('Nothing to send. Check input and parameters');
           }
@@ -159,10 +169,14 @@ const nodeInit: NodeInitializer = (RED) => {
           data.id = id;
           data.type = type as OutMessage['type'];
           if (id && this.controller) {
-            this.controller.sendMessage(this.stationId, this.input, data);
-            this.debug(
-              `Sending data: station: ${this.stationId}, input type: ${this.input}, data: ${JSON.stringify(data)}`,
-            );
+            try {
+              const result = await this.controller.sendMessage(this.stationId, this.input, data);
+              this.debug(
+                `Sending data: station: ${this.stationId}, input type: ${this.input}, data: ${JSON.stringify(data)}, result: ${result}`,
+              );
+            } catch (err) {
+              this.error(`sendMessage failed: ${err instanceof Error ? err.message : String(err)}`);
+            }
           } else {
             this.debug('playMusic: missing id, nothing to send');
           }
@@ -170,10 +184,14 @@ const nodeInit: NodeInitializer = (RED) => {
           data.payload = input.payload;
           data.hap = input.hap;
           if (this.controller) {
-            this.controller.sendMessage(this.stationId, this.input, data);
-            this.debug(
-              `Sending data: station: ${this.stationId}, input type: ${this.input}, data: ${JSON.stringify(data)}`,
-            );
+            try {
+              const result = await this.controller.sendMessage(this.stationId, this.input, data);
+              this.debug(
+                `Sending data: station: ${this.stationId}, input type: ${this.input}, data: ${JSON.stringify(data)}, result: ${result}`,
+              );
+            } catch (err) {
+              this.error(`sendMessage failed: ${err instanceof Error ? err.message : String(err)}`);
+            }
           }
         }
       } else {

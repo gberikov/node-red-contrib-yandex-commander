@@ -14,7 +14,9 @@
         "whisper": "耳语",
         "default_command": "默认命令",
         "music_id": "音乐 ID",
-        "music_type": "音乐类型"
+        "music_type": "音乐类型",
+        "cloud_fallback": "Cloud TTS fallback",
+        "cloud_fallback_hint": "Use Yandex cloud when the local WebSocket is unavailable"
     },
     "placeholder": {
         "name": "名称",

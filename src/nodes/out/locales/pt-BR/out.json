@@ -14,7 +14,9 @@
         "whisper": "Sussurro",
         "default_command": "Comando padrão",
         "music_id": "ID de música",
-        "music_type": "Tipo de música"
+        "music_type": "Tipo de música",
+        "cloud_fallback": "Cloud TTS fallback",
+        "cloud_fallback_hint": "Use Yandex cloud when the local WebSocket is unavailable"
     },
     "placeholder": {
         "name": "Nome",

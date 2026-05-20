@@ -3,6 +3,7 @@ import type { NodeInitializer } from 'node-red';
 import { QuasarApi } from '@/lib/api';
 import type { Device } from '@/lib/api/device';
 import { YandexAuth } from '@/lib/auth';
+import { QuasarCloud } from '@/lib/quasarCloud';
 import type {
   ConnectNode,
   ConnectNodeConfig,
@@ -16,6 +17,7 @@ import type {
   WsPayload,
 } from '@/lib/types';
 import { nextBackoffMs } from './backoff';
+import { decideCloudRoute } from './cloudRoute';
 import { applyCloudFallback, discoverDevices } from './discovery';
 import { GlagolClient } from './glagolClient';
 import { DeviceRegistry } from './registry';
@@ -59,6 +61,15 @@ const nodeInit: NodeInitializer = (RED) => {
 
     let getDevicesInterval: ReturnType<typeof setInterval> | undefined;
     let httpRouteRegistered = false;
+    let quasarCloud: QuasarCloud | undefined;
+
+    function ensureQuasarCloud(): QuasarCloud {
+      if (!quasarCloud) {
+        node.debug('Initialising QuasarCloud for cloud TTS');
+        quasarCloud = new QuasarCloud(node.token, node.debug.bind(node));
+      }
+      return quasarCloud;
+    }
 
     // ── Public API (bound below) ────────────────────────────────────────────
 
@@ -74,24 +85,38 @@ const nodeInit: NodeInitializer = (RED) => {
       return { color: 'yellow', text: 'connecting...' };
     }
 
-    function sendMessage(
+    async function sendMessage(
       this: ConnectNode,
       deviceId: string,
       messageType: MessageType,
       message?: OutMessage,
-    ): string | undefined {
+    ): Promise<string | undefined> {
       const device = registry.get(deviceId);
       if (!device) return undefined;
-      const client = glagolClients.get(deviceId);
-      if (!client?.isOpen()) return 'Device offline';
 
+      const client = glagolClients.get(deviceId);
+      const localOpen = !!client?.isOpen();
+      const msg = message ?? ({} as OutMessage);
+
+      const route = decideCloudRoute(messageType, localOpen, msg.cloud, msg.cloudFallback);
+
+      if (route === 'offline') return 'Device offline';
+
+      if (route === 'cloud') {
+        try {
+          const text = typeof msg.payload === 'string' ? msg.payload : String(msg.payload ?? '');
+          await ensureQuasarCloud().sendCloudTts(deviceId, text);
+          return 'ok-cloud';
+        } catch (err) {
+          node.error(`Cloud TTS failed for ${deviceId}: ${errMessage(err)}`);
+          return undefined;
+        }
+      }
+
+      // route === 'local' — original path.
+      if (!client?.isOpen()) return 'Device offline';
       try {
-        const result = buildWsPayload(
-          messageType,
-          message ?? ({} as OutMessage),
-          device.lastState,
-          node.debug.bind(node),
-        );
+        const result = buildWsPayload(messageType, msg, device.lastState, node.debug.bind(node));
 
         const tts = ensureTtsMachine(deviceId);
         if (result.waitForListening) tts.armStopListening();
@@ -289,12 +314,12 @@ const nodeInit: NodeInitializer = (RED) => {
       const client = glagolClients.get(deviceId);
       if (!client?.isOpen()) return;
       if (action.type === 'stopListening') {
-        sendMessage.call(node, deviceId, 'stopListening');
+        void sendMessage.call(node, deviceId, 'stopListening');
       } else if (action.type === 'play') {
-        sendMessage.call(node, deviceId, 'command', { payload: 'play' } as OutMessage);
+        void sendMessage.call(node, deviceId, 'command', { payload: 'play' } as OutMessage);
       } else if (action.type === 'setVolume' && typeof action.volume === 'number') {
         const payload: WsPayload = { command: 'setVolume', volume: action.volume };
-        sendMessage.call(node, deviceId, 'raw', { payload } as OutMessage);
+        void sendMessage.call(node, deviceId, 'raw', { payload } as OutMessage);
       }
     }
 
@@ -306,9 +331,9 @@ const nodeInit: NodeInitializer = (RED) => {
       if (allowed) return;
       const flag = schedulerFlags.get(device.id);
       if (flag === false) return;
-      sendMessage.call(node, device.id, 'command', { payload: 'stop' } as OutMessage);
+      void sendMessage.call(node, device.id, 'command', { payload: 'stop' } as OutMessage);
       if (phrase && phrase.length > 0 && state.aliceState !== 'SPEAKING') {
-        sendMessage.call(node, device.id, 'tts', { payload: phrase, stopListening: true } as OutMessage);
+        void sendMessage.call(node, device.id, 'tts', { payload: phrase, stopListening: true } as OutMessage);
       }
       schedulerFlags.set(device.id, false);
       setTimeout(() => schedulerFlags.set(device.id, true), SCHEDULER_GRACE_MS);
@@ -426,6 +451,7 @@ const nodeInit: NodeInitializer = (RED) => {
       schedulerFlags.clear();
       reconnectAttempts.clear();
       registry.clear();
+      quasarCloud = undefined;
     }
 
     node.on('close', onClose);
