@@ -61,3 +61,122 @@ describe('stripSsml', () => {
     expect(stripSsml("<speaker voice='alyss'>  привет  ", noop).text).toBe('привет');
   });
 });
+
+import axios from 'axios';
+import { beforeEach, vi } from 'vitest';
+import { QuasarCloud } from '@/lib/quasarCloud';
+
+vi.mock('axios');
+
+interface StubCall {
+  method: string;
+  url: string;
+  data?: unknown;
+  headers?: Record<string, string>;
+}
+
+function makeAxiosStub() {
+  const calls: StubCall[] = [];
+  const responses: Array<{ status?: number; data: unknown }> = [];
+  const instance = {
+    request: vi.fn(async (opts: { method: string; url: string; data?: unknown; headers?: Record<string, string> }) => {
+      calls.push({ method: opts.method, url: opts.url, data: opts.data, headers: opts.headers });
+      const next = responses.shift();
+      if (!next) throw new Error(`unexpected request: ${opts.method} ${opts.url}`);
+      if (next.status && next.status >= 400) {
+        const err = new Error(`HTTP ${next.status}`) as Error & { response: { status: number; data: unknown } };
+        err.response = { status: next.status, data: next.data };
+        throw err;
+      }
+      return { data: next.data, status: next.status ?? 200 };
+    }),
+  };
+  return { instance, calls, responses };
+}
+
+describe('QuasarCloud.sendCloudTts', () => {
+  let stub: ReturnType<typeof makeAxiosStub>;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    stub = makeAxiosStub();
+    vi.mocked(axios.create).mockReturnValue(stub.instance as unknown as ReturnType<typeof axios.create>);
+  });
+
+  it('happy path: fetches csrf, lists, creates, updates, runs', async () => {
+    // GET /csrf_token → token
+    stub.responses.push({ data: { status: 'ok', token: 'csrf-1' } });
+    // GET /m/v3/user/scenarios → empty list
+    stub.responses.push({ data: { scenarios: [] } });
+    // POST /m/v3/user/scenarios → created with id
+    stub.responses.push({ data: { scenario_id: 'sc-1' } });
+    // PUT scenario → ok
+    stub.responses.push({ data: { status: 'ok' } });
+    // POST actions → ok
+    stub.responses.push({ data: { status: 'ok' } });
+
+    const cloud = new QuasarCloud('oauth-token', () => {});
+    await cloud.sendCloudTts('abc123', 'Привет');
+
+    expect(stub.calls).toHaveLength(5);
+
+    expect(stub.calls[0].method).toBe('GET');
+    expect(stub.calls[0].url).toBe('/csrf_token');
+
+    expect(stub.calls[1].method).toBe('GET');
+    expect(stub.calls[1].url).toBe('/m/v3/user/scenarios');
+
+    expect(stub.calls[2].method).toBe('POST');
+    expect(stub.calls[2].url).toBe('/m/v3/user/scenarios');
+    expect(stub.calls[2].headers?.['x-csrf-token']).toBe('csrf-1');
+
+    expect(stub.calls[3].method).toBe('PUT');
+    expect(stub.calls[3].url).toBe('/m/v3/user/scenarios/sc-1');
+    expect(stub.calls[3].headers?.['x-csrf-token']).toBe('csrf-1');
+
+    const putBody = stub.calls[3].data as {
+      name: string;
+      icon: string;
+      triggers: unknown[];
+      steps: Array<{
+        type: string;
+        parameters: { items: Array<{ id: string; type: string; value: { instance: string; value: string } }> };
+      }>;
+    };
+    expect(putBody.name).toBe('ЯC йклабв');
+    expect(putBody.icon).toBe('home');
+    expect(putBody.triggers).toEqual([]);
+    expect(putBody.steps[0].type).toBe('scenarios.steps.actions.v2');
+    expect(putBody.steps[0].parameters.items[0]).toEqual({
+      id: 'abc123',
+      type: 'devices.types.smart_speaker',
+      value: { instance: 'phrase_action', value: 'Привет' },
+    });
+
+    expect(stub.calls[4].method).toBe('POST');
+    expect(stub.calls[4].url).toBe('/m/v3/user/scenarios/sc-1/actions');
+  });
+
+  it('passes Authorization: OAuth header on axios.create', async () => {
+    stub.responses.push({ data: { status: 'ok', token: 'csrf-1' } });
+    stub.responses.push({ data: { scenarios: [] } });
+    stub.responses.push({ data: { scenario_id: 'sc-1' } });
+    stub.responses.push({ data: { status: 'ok' } });
+    stub.responses.push({ data: { status: 'ok' } });
+
+    new QuasarCloud('oauth-token', () => {});
+    expect(vi.mocked(axios.create)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        baseURL: 'https://iot.quasar.yandex.ru',
+        headers: expect.objectContaining({ Authorization: 'OAuth oauth-token' }),
+      }),
+    );
+  });
+
+  it('rejects when stripped text is shorter than 2 chars', async () => {
+    const cloud = new QuasarCloud('oauth-token', () => {});
+    await expect(cloud.sendCloudTts('abc123', '+')).rejects.toThrow(/too short/);
+    // No HTTP calls should have happened.
+    expect(stub.calls).toHaveLength(0);
+  });
+});
