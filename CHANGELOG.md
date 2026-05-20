@@ -16,6 +16,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `track`, `artist`, `album`, `playlist`, `radio`. Both fields can be
   overridden per message via `msg.id` and `msg.type`. Locale strings
   added in all 9 supported locales.
+- Cloud TTS fallback for the OUT node. When the local Glagol WebSocket
+  is unavailable (station offline, mDNS unreachable, manual
+  disconnect), the OUT node can route TTS through the Quasar cloud
+  scenarios API. Off by default; enable per-node via the
+  "Cloud TTS fallback" checkbox, or per-message via `msg.cloud === true`.
+  `msg.cloud === false` forbids cloud for that message even when the
+  checkbox is on. Limitations: plain text only (SSML / voice / effect /
+  whisper stripped), 2–100 character window, latency ~500–1500 ms, and
+  a scenario named `ЯC <encoded_device_id>` is created in the user's
+  Quasar account. Compatible with `AlexxIT/YandexStation`-created
+  scenarios — we adopt them by name rather than duplicating. See
+  `wiki/ru/Cloud-TTS.md`.
 
 ## [0.2.0] — 2026-05-20
 
