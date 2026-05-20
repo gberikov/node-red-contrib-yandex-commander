@@ -25,6 +25,14 @@ Multiple devices (tested) and multiple accounts (tested) are supported.
 
 - [Installation](Installation)
 - [Initial Setup](Initial-Setup)
+- **Nodes:**
+  - [Station](Station-Node)
+  - [IN](IN-Node)
+  - [GET](GET-Node)
+  - [OUT](OUT-Node)
+- [RAW commands](RAW-Commands)
+- [Usage examples](Examples)
+- [FAQ](FAQ)
 - **Development:**
   - [For Developers](For-Developers) — architecture, TypeScript, esbuild, Biome, tests
   - [Building from source](Building)
